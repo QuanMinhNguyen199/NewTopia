@@ -5,7 +5,7 @@ web
 ## Stack
 React, explicitly selected by the user. Vite for local development and static builds.
 ## Product Purpose
-Started as a close reproduction of the Vietnamese document search interface in the supplied two-page PDF. Since 2026-10-24, at the user's request, the results area has been restructured to reduce information overload and scrolling, especially on mobile ("Đọc theo lớp": grouped answer, inline citations, tabbed evidence). The PDF's visual tokens still apply; its long, all-expanded reading order no longer does. This restructure has not yet been validated with target users.
+Started as a close reproduction of the Vietnamese document search interface in the supplied two-page PDF. Since 2026-10-24, at the user's request, the results area has been restructured to reduce information overload and scrolling, especially on mobile ("Đọc theo lớp": grouped answer, inline citations, tabbed evidence). The PDF's visual tokens still apply; its long, all-expanded reading order no longer does. Also on 2026-10-24: the query collapses to a sticky bar once results show, the desktop evidence drawer can be folded into a rail, and on 768–1099px evidence opens as a side panel. The page is also embedded as an iframe inside GeoAgent, an AI chat, where it shows search results within the conversation (embed mode, see DESIGN.md). This restructure has not yet been validated with target users.
 ## Capabilities and Constraints
 Frontend recreation. No backend, authentication provider, document database, or LLM credentials were supplied. Initial content is a visual fixture transcribed from the PDF, not verified legal information. Local interactions must identify this limitation rather than fabricate search answers.
 ## Brand Commitments

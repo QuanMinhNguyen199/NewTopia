@@ -7,6 +7,22 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const docCount=async()=>Number((await page.locator('#tab-docs .count').textContent()).split('/').pop());
 await page.goto(process.env.CHECK_URL || 'http://127.0.0.1:5173');
 await page.screenshot({path:'.impeccable/review/desktop.png',fullPage:true});
+// Đã có kết quả: khối câu hỏi thu thành thanh, mở lại bằng Sửa câu hỏi, Hủy sửa trả về câu hỏi cũ.
+if(!await page.locator('.query-bar').isVisible()||await page.locator('#question').count())throw Error('Collapsed query bar missing');
+await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
+await page.locator('#question').fill('câu hỏi tạm');
+await page.getByRole('button',{name:'Hủy sửa'}).click();
+if(!(await page.locator('.query-text').textContent()).includes('Nghị quyết 57'))throw Error('Cancel edit failed');
+// Bấm ra ngoài khi đang sửa: form thu lại, thanh vẫn hiện câu hỏi cũ, mở lại thì còn bản gõ dở.
+await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
+await page.locator('#question').fill('bản gõ dở');
+await page.locator('#answer-title').click();
+if(await page.locator('#question').count()||!(await page.locator('.query-text').textContent()).includes('Nghị quyết 57'))throw Error('Click outside should dismiss editing');
+await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
+if(await page.locator('#question').inputValue()!=='bản gõ dở')throw Error('Draft should survive click outside');
+await page.locator('.filters summary').click();
+if(!await page.locator('#question').count())throw Error('Clicks inside the form must not dismiss it');
+await page.getByRole('button',{name:'Hủy sửa'}).click();
 // Lớp 1: mỗi nhóm chỉ hiện ý đầu, mở thêm được.
 const initialBullets=await page.locator('.unit.open li').count();
 await page.getByRole('button',{name:/Mở cả \d+ ý/}).click();
@@ -26,13 +42,32 @@ await page.getByRole('button',{name:'Đóng',exact:true}).click();
 if(await page.locator('#tab-sources .count').textContent()!=='1/8'||!await page.locator('.context-line').isVisible())throw Error('Evidence matching missing');
 await page.locator('.context-line').getByRole('button',{name:'Hiện tất cả'}).click();
 if(await page.locator('#tab-sources .count').textContent()!=='8'||await page.locator('#panel-sources .excerpt').count()!==8)throw Error('Show all evidence failed');
+// Đầu trang gộp vào thanh: không còn khối tiêu đề, chế độ tra cứu nằm trong thanh.
+if(await page.locator('header').count()||!await page.locator('.query-bar [role=tab]').first().isVisible())throw Error('Header should fold into query bar');
+// Cuộn xuống: thanh câu hỏi trượt khuất; cuộn lên: hiện lại.
+await page.getByRole('button',{name:/Mở cả \d+ ý/}).click();
+await page.mouse.move(600,600);
+await page.mouse.wheel(0,900);await page.waitForTimeout(400);
+if(!await page.locator('.query-bar.is-hidden').count())throw Error('Query bar should hide on scroll down');
+await page.mouse.wheel(0,-300);await page.waitForTimeout(400);
+if(await page.locator('.query-bar.is-hidden').count())throw Error('Query bar should show on scroll up');
+await page.evaluate(()=>scrollTo(0,0));
+await page.getByRole('button',{name:'Thu gọn tất cả',exact:true}).first().click();
+// Thu gọn bằng chứng thành dải; [n] mở lại.
+await page.getByRole('button',{name:'Thu gọn',exact:true}).click();
+if(await page.locator('#evidence').isVisible()||!await page.locator('.evidence-rail').first().isVisible())throw Error('Collapse evidence failed');
+await page.locator('.answer .cite').first().click();
+if(!await page.locator('#evidence').isVisible()||await page.locator('#panel-sources .excerpt.active').count()!==1)throw Error('Citation should reopen evidence');
+await page.locator('.context-line').getByRole('button',{name:'Hiện tất cả'}).click();
 // Lọc, xóa lọc.
+await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
 await page.locator('.filters summary').click();
 await page.getByPlaceholder('Số hiệu hoặc nội dung').fill('150/BC');
 await page.getByRole('button',{name:'Hỏi',exact:true}).click();
 await page.waitForTimeout(350);
 await page.locator('#tab-docs').click();
 if(await docCount()!==1||await page.locator('.document').count()!==1)throw Error('Keyword filter failed');
+if(!await page.locator('.query-bar').isVisible()||!(await page.locator('.query-filters').textContent()).includes('(1)'))throw Error('Query bar after search failed');
 await page.getByRole('button',{name:'Xóa bộ lọc'}).click();
 if(await docCount()!==15)throw Error('Reset failed');
 await page.locator('#tab-docs').click();
@@ -53,6 +88,22 @@ if(!await page.locator('.relation-row').first().isVisible())throw Error('Relatio
 await page.getByRole('tab',{name:'Báo cáo tổng hợp'}).click();
 await page.getByRole('button',{name:'Tải báo cáo'}).waitFor();
 await page.getByRole('tab',{name:'Hỏi đáp'}).click();
+// Tablet: bằng chứng là panel; [n] mở panel, Esc đóng và trả focus.
+await page.setViewportSize({width:900,height:1000});
+await page.waitForTimeout(400);
+if(await page.locator('#evidence').isVisible()||!await page.locator('.evidence-rail').first().isVisible())throw Error('Tablet panel should start closed');
+await page.locator('.answer .cite').first().click();
+await page.waitForTimeout(350);
+if(!await page.locator('#evidence').isVisible()||await page.locator('#panel-sources .excerpt.active').count()!==1)throw Error('Tablet citation should open panel');
+await page.screenshot({path:'.impeccable/review/tablet.png'});
+await page.keyboard.press('Escape');
+await page.waitForTimeout(300);
+if(await page.locator('#evidence').isVisible())throw Error('Tablet Escape failed');
+await page.locator('.evidence-rail').first().click();
+await page.waitForTimeout(300);
+if(!await page.locator('#evidence').isVisible())throw Error('Tablet rail failed');
+await page.getByRole('button',{name:'Đóng',exact:true}).first().click();
+if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Tablet horizontal overflow');
 await page.reload();
 await page.setViewportSize({width:390,height:844});
 await page.screenshot({path:'.impeccable/review/mobile.png',fullPage:true});
@@ -60,8 +111,42 @@ await page.screenshot({path:'.impeccable/review/mobile.png',fullPage:true});
 if(await page.locator('.results').evaluate(e=>getComputedStyle(e).display)==='grid')throw Error('Mobile should be single column');
 await page.locator('.answer .cite').first().click();
 await page.locator('.excerpt.inline').waitFor({timeout:3000}).catch(()=>{throw Error('Mobile inline citation failed')});
+// Dưới 768px vẫn có dải bằng chứng bên phải; bấm mở panel, Esc đóng.
+for(const width of [745,390]){
+ await page.setViewportSize({width,height:844});
+ await page.waitForTimeout(400);
+ if(await page.locator('#evidence').isVisible()||!await page.locator('.evidence-rail').isVisible())throw Error(`Rail missing at ${width}px`);
+ await page.locator('.evidence-rail').click();
+ await page.waitForTimeout(350);
+ if(!await page.locator('#evidence').isVisible())throw Error(`Panel failed at ${width}px`);
+ await page.screenshot({path:`.impeccable/review/panel-${width}.png`});
+ await page.keyboard.press('Escape');
+ await page.waitForTimeout(300);
+ if(await page.locator('#evidence').isVisible())throw Error(`Panel Escape failed at ${width}px`);
+}
 const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
 if(overflow)throw Error('Mobile horizontal overflow');
+// Nhúng trong khung chat GeoAgent: không đầu trang/thanh câu hỏi, chia đôi từ 720px, báo chiều cao cho khung chat.
+const appUrl=page.url().split('?')[0];
+for(const [width,splitExpected] of [[970,true],[600,false]]){
+ const host=await browser.newPage({viewport:{width:1400,height:900}});
+ host.on('pageerror',e=>errors.push(e.message));
+ await host.setContent(`<iframe id="f" src="${appUrl}?embed=1" style="width:${width}px;height:400px;border:0"></iframe><script>window.heights=[];addEventListener('message',e=>{if(e.data?.type==='van-ban/resize'){heights.push(e.data.height);document.getElementById('f').style.height=e.data.height+'px'}})</script>`);
+ const frame=host.frameLocator('#f');
+ await frame.locator('.answer').waitFor();
+ await host.waitForTimeout(400);
+ if(await frame.locator('.query-bar, header, #question').count())throw Error('Embed should hide header and query');
+ const display=await frame.locator('.results').evaluate(e=>getComputedStyle(e).display);
+ if((display==='grid')!==splitExpected)throw Error(`Embed ${width}px split layout wrong`);
+ if(!(await host.evaluate(()=>window.heights.length)))throw Error('Embed did not report height');
+ await frame.locator('.answer .cite').first().click();
+ if(splitExpected&&await frame.locator('#panel-sources .excerpt.active').count()!==1)throw Error('Embed citation to evidence failed');
+ if(!splitExpected&&!await frame.locator('.excerpt.inline').count())throw Error('Embed narrow inline citation failed');
+ await host.waitForTimeout(700);
+ if(await frame.locator('.drawer-tabs').evaluate(e=>e.scrollWidth>e.clientWidth+1))throw Error(`Embed ${width}px evidence tabs overflow`);
+ await host.screenshot({path:`.impeccable/review/embed-${width}.png`,fullPage:true});
+ await host.close();
+}
 if(errors.length)throw Error(errors.join('\n'));
-console.log('PASS: desktop split with citation↔source linking, mobile inline citation, answer groups, source dialog, filter, reset, show all, evidence tabs, report tab, mobile without horizontal overflow or browser errors');
+console.log('PASS: embed in GeoAgent frame (970/600px, height reporting), collapsed query bar, evidence collapse to rail, tablet evidence panel, desktop split with citation↔source linking, mobile inline citation, answer groups, source dialog, filter, reset, show all, evidence tabs, report tab, mobile without horizontal overflow or browser errors');
 await browser.close();

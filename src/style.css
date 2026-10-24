@@ -62,6 +62,21 @@ input[type=checkbox]{accent-color:var(--action);width:16px;height:16px;margin:0}
 .filter-grid label{display:grid;gap:4px;font-size:13px;color:var(--ink-2)}
 .filter-grid input,.filter-grid select{font-size:14px;height:40px}
 #notice{color:var(--ink-2);font-size:13px;margin:8px 0 0}
+/* Thanh câu hỏi sau khi có kết quả: một dòng, bám đầu trang; chừa chỗ cho nó khi cuộn tới một mục */
+html{scroll-padding-top:72px}
+.query-bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px 20px;min-height:56px;padding:0;background:var(--paper);border-bottom:1px solid var(--rule);transition:transform .22s var(--out)}
+/* Cuộn xuống: thanh trượt khuất lên trên; cột bằng chứng và dải lên sát đầu màn hình */
+.query-bar.is-hidden{transform:translateY(calc(-100% - 2px));transition:transform .18s ease-in}
+/* Chế độ tra cứu nằm trong thanh: vạch chọn trùng đường kẻ đáy thanh */
+.query-bar nav{align-self:stretch;margin:0;border:0}
+.query-bar [role=tablist]{height:100%;gap:20px}
+.query-bar .tab{height:100%;padding:0;font-size:14px}
+.query-text{flex:1;min-width:0;margin:0;padding-left:20px;border-left:1px solid var(--rule);font-weight:500;line-height:24px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
+.user-compact select{width:auto;max-width:190px;height:36px;padding:0 8px;font-size:13px;color:var(--ink-2)}
+.query-filters{display:inline-flex;align-items:center;gap:10px;margin:0;color:var(--ink-2);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.query-filters .link-btn{font-size:13px}
+.query-bar .timing{margin-left:0;white-space:nowrap}
+.query-bar .btn{flex:none}
 
 /* Nút phụ: viền mảnh hoặc chỉ chữ */
 .btn{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border:1px solid var(--rule-strong);border-radius:4px;background:var(--paper);color:var(--ink);font-size:14px;font-weight:500}
@@ -133,7 +148,7 @@ li:focus-visible{outline:2px solid var(--focus);outline-offset:0}
 
 /* Ngăn hồ sơ: mép phân trang trên nền tint, mép đang chọn nối liền với ngăn trắng */
 .evidence .section-head{margin-bottom:4px}
-.drawer-tabs{position:relative;display:flex;gap:24px;border-bottom:1px solid var(--rule)}
+.drawer-tabs{position:relative;display:flex;gap:20px;border-bottom:1px solid var(--rule)}
 .drawer-tabs [role=tab]{display:inline-flex;align-items:baseline;gap:6px;min-height:44px;padding:0;border:0;background:none;color:var(--ink-2);font-size:14px;font-weight:500;white-space:nowrap}
 .drawer-tabs [role=tab]:hover{color:var(--ink)}
 .drawer-tabs [aria-selected=true]{color:var(--ink);font-weight:600}
@@ -189,17 +204,80 @@ dialog[open]::backdrop{background:var(--backdrop);animation:fade-in .2s ease-out
 #dialog-content{font-family:var(--serif);font-size:17px;white-space:pre-line;line-height:1.7;padding:16px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .dialog-foot{color:var(--ink-2);font-size:13px;margin:12px 0 0}
 
-/* Desktop: chia đôi; ngăn hồ sơ dính theo khi cuộn */
+/* Dải bằng chứng: mép hồ sơ dựng đứng, ghi nhãn và số văn bản */
+/* Dải bằng chứng: nền xanh mực để nổi như một nút hành động; hover đậm hơn và nhô ra như kéo mép hồ sơ */
+.evidence-rail{display:flex;flex-direction:column;align-items:center;gap:10px;width:44px;padding:16px 0 14px;border:1px solid var(--action);border-radius:4px;background:var(--action);color:#fff;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(22,35,58,.18);transition:background-color .12s ease-out,translate .2s var(--out),box-shadow .2s var(--out);animation:rail-in .36s var(--out)}
+.evidence-rail .rail-label{writing-mode:vertical-rl;line-height:1}
+.evidence-rail .count{min-width:24px;padding-top:8px;border-top:1px solid rgba(255,255,255,.35);color:#fff;font-weight:600;text-align:center}
+.evidence-rail:hover{background:var(--action-hover);border-color:var(--action-hover);translate:-4px 0;box-shadow:0 6px 18px rgba(22,35,58,.26)}
+.evidence-rail:active{translate:-2px 0}
+@keyframes rail-in{from{translate:100% 0;opacity:0}to{translate:0 0;opacity:1}}
+/* Mở lại ngăn bằng chứng trên desktop: trượt ra từ mép phải, cùng hướng với dải */
+.evidence.docking{animation:drawer-in .28s var(--out)}
+@keyframes drawer-in{from{opacity:0;translate:24px 0}to{opacity:1;translate:0 0}}
+.results[aria-busy=true] .answer{opacity:.5;transition:opacity .15s ease-out}
+.scrim{position:fixed;inset:0;z-index:15;background:var(--backdrop);animation:fade-in .2s ease-out}
+
+/* Desktop: chia đôi; ngăn hồ sơ dính theo khi cuộn, thu gọn được thành dải. Không áp dụng khi nhúng. */
 @media(min-width:1100px){
- main{max-width:1240px;padding-bottom:24px}
- .results{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:40px;align-items:start}
- .results.solo{grid-template-columns:minmax(0,1fr)}
- .skip-link:focus{grid-column:1/-1}
- .evidence{position:sticky;top:0;max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 4px 16px 0}
- .evidence-head{position:sticky;top:0;z-index:2;background:var(--paper);padding-top:36px}
- .evidence .section-head{margin-top:0}
+ main:not(.embed){max-width:1240px;padding-bottom:24px}
+ main:not(.embed) .results{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:32px;align-items:start}
+ main:not(.embed) .results.solo{grid-template-columns:minmax(0,1fr)}
+ main:not(.embed) .results.railed{grid-template-columns:minmax(0,1fr) 44px}
+ main:not(.embed) .skip-link:focus{grid-column:1/-1}
+ main:not(.embed) .evidence{position:sticky;top:0;max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 4px 16px 0}
+ .compact .evidence{top:57px;max-height:calc(100dvh - 69px);transition:top .22s var(--out),max-height .22s var(--out)}
+ .compact.bar-hidden .evidence{top:0;max-height:calc(100dvh - 24px)}
+ main:not(.embed) .evidence-head{position:sticky;top:0;z-index:2;background:var(--paper);padding-top:36px}
+ main:not(.embed) .evidence .section-head{margin-top:0}
+ main:not(.embed) .evidence-rail{position:sticky;top:12px;margin-top:36px}
+ .compact .evidence-rail{top:72px}
+ .compact.bar-hidden .evidence-rail{top:12px}
+}
+/* Dưới 1100px: bằng chứng là panel trượt từ phải, mở bằng dải bám mép phải. Không áp dụng khi nhúng
+   hoặc khi trang không có câu trả lời (bằng chứng khi đó nằm trong trang). */
+@media(max-width:1099px){
+ main:not(.embed){padding-right:60px}
+ main:not(.embed) .evidence-rail{position:fixed;top:50%;right:0;z-index:10;transform:translateY(-50%);border-right:0;border-radius:4px 0 0 4px}
+ main:not(.embed) .results:not(.solo) .evidence{position:fixed;top:0;right:0;bottom:0;z-index:20;width:min(440px,calc(100vw - 48px));overflow:auto;overscroll-behavior:contain;padding:0 20px 24px;background:var(--paper);border-left:1px solid var(--rule);box-shadow:0 18px 50px rgba(22,35,58,.22);transform:translateX(100%);visibility:hidden;transition:transform .2s ease-in,visibility 0s .2s}
+ main:not(.embed) .results:not(.solo) .evidence.is-open{transform:none;visibility:visible;transition:transform .26s var(--out)}
+ main:not(.embed) .results:not(.solo) .evidence-head{position:sticky;top:0;z-index:2;background:var(--paper);padding-top:16px}
+ main:not(.embed) .results:not(.solo) .evidence .section-head{margin-top:0}
+}
+/* Mobile: dải hẹp hơn để chữ câu trả lời mất ít chiều ngang nhất */
+@media(max-width:640px){
+ main:not(.embed){padding-right:46px}
+ main:not(.embed) .evidence-rail{width:36px;font-size:13px;padding:14px 0 12px}
+ main:not(.embed) .results:not(.solo) .evidence{padding:0 16px 24px}
+}
+/* Nhúng trong khung chat GeoAgent: không đầu trang; trang không tự cuộn mà báo chiều cao cho khung chat.
+   Từ 720px chia đôi, cột bằng chứng cao bằng câu trả lời (tối thiểu 480px) và cuộn bên trong. */
+.embed{max-width:none;padding:12px 16px 16px}
+.embed-note{margin:0 0 4px;color:var(--ink-2);font-size:13px}
+.embed .answer>.section-head:first-child{margin-top:12px}
+.embed-wide .results{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px}
+.embed-wide .drawer-tabs{gap:16px}
+.embed-wide .results.solo{grid-template-columns:minmax(0,1fr)}
+.embed-wide .results.railed{grid-template-columns:minmax(0,1fr) 44px}
+.embed-wide .skip-link:focus{grid-column:1/-1}
+.embed-wide .evidence{height:0;min-height:max(100%,480px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:4px}
+.embed-wide .results.solo .evidence{height:auto;min-height:0;overflow:visible}
+.embed-wide .evidence-head{position:sticky;top:0;z-index:2;background:var(--paper)}
+.embed-wide .evidence .section-head{margin-top:12px}
+.embed-wide .evidence-rail{align-self:start;margin-top:12px}
+.embed dialog{position:absolute;bottom:auto;margin-top:0}
+@media(max-width:1099px){
+ .query-bar .timing{display:none}
 }
 @media(max-width:640px){
+ /* Mobile: hàng 1 chế độ tra cứu, hàng 2 câu hỏi và nút sửa; người dùng giả lập nằm trong form đầy đủ */
+ .query-bar{flex-wrap:wrap;gap:0 12px;padding-bottom:8px}
+ .query-bar nav{flex-basis:100%;border-bottom:1px solid var(--rule);margin-bottom:8px}
+ .query-bar .tab{min-height:44px}
+ .query-text{padding-left:0;border-left:0}
+ .user-compact{display:none}
+ .query-filters{order:3;flex-basis:100%}
+ .query-bar .btn{min-height:40px}
  main{padding:20px 14px 40px}
  header{grid-template-columns:1fr;gap:12px}
  nav{margin:16px 0}
@@ -235,5 +313,9 @@ dialog[open]::backdrop{background:var(--backdrop);animation:fade-in .2s ease-out
  .excerpt.pulled{animation:none}
  .excerpt.inline,.drawer,dialog[open]{animation:fade-in .15s ease-out}
  .unit-body,.unit.open .unit-body{transition:opacity .15s ease-out}
- .unit-row .icon,.filters summary .icon,.tab-ink{transition:none}
+ .unit-row .icon,.filters summary .icon,.tab-ink,.evidence,.evidence.is-open{transition:none}
+ .evidence-rail{animation:none;transition:background-color .12s ease-out}
+ .query-bar,.query-bar.is-hidden,.compact .evidence{transition:none}
+ .evidence-rail:hover,.evidence-rail:active{translate:none}
+ .evidence.docking{animation:fade-in .15s ease-out}
 }
