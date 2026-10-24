@@ -47,3 +47,14 @@ export const sources = [
 ['150/BC-VHXH','bao_cao · 20/08/2026 · ỦY BAN NHÂN DÂN PHƯỜNG PHÚ LƯƠNG · trang 4, 5 · both','4. Về thực hiện một số nhiệm vụ được Đoàn giám sát số 17 yêu cầu\n- Tiếp tục tham mưu thực hiện nghiêm túc việc cập nhật dữ liệu lên “Hệ\nthống giám sát Nghị quyết số 57”; đảm bảo việc cập nhật trên Hệ thống\ntheodoinq.dcs.vn hoàn thành trước 16h00 hằng ngày.'],
 ['109 - BC/BCĐ57','bao_cao · 20/08/2026 · BAN CHỈ ĐẠO 57 ĐẢNG ỦY XÃ PHÙ CÁT · trang 31, 32 · both','70% Các cuộc họp được tổ chức trên môi trường số và không sử dụng tài liệu giấy, ngoại trừ các\ncuộc họp có nội dung liên quan đến bí mật nhà nước hoặc yêu cầu bắt buộc phải sử dụng\nvăn bản giấy theo quy định.\n30% các thôn, xóm được lắp đặt hệ thống camera an ninh để nâng cao hiệu quả quản lý']
 ];
+// Đơn vị và cơ quan ban hành của từng đoạn nguồn, chép từ metadata nguồn trong PDF.
+export const sourceOrigins = [
+['Thành phố Hà Nội','Ủy ban Kiểm tra Thành ủy Hà Nội'],
+['Xã Đại Phúc','Đảng ủy xã Đại Phúc'],
+['Xã Phù Cát','Ban Chỉ đạo 57 Đảng ủy xã Phù Cát'],
+['Xã Phù Cát','Ban Chỉ đạo 57 Đảng ủy xã Phù Cát'],
+['Phường Đại Mỗ','Đảng ủy phường Đại Mỗ'],
+['Xã Ứng Hòa','Đảng ủy xã Ứng Hòa, Ban Xây dựng Đảng'],
+['Phường Phú Lương','Ủy ban nhân dân phường Phú Lương'],
+['Xã Phù Cát','Ban Chỉ đạo 57 Đảng ủy xã Phù Cát']
+];
