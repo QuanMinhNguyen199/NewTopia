@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T02:53:01.174Z",
+  "title": "Design System: Tra cứu và tổng hợp văn bản",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "bg",
+        "canonical": "#171715",
+        "tonalRamp": [
+          "oklch(15% .005 105)",
+          "oklch(26% .005 105)",
+          "oklch(38% .005 105)",
+          "oklch(49% .005 105)",
+          "oklch(61% .005 105)",
+          "oklch(72% .005 105)",
+          "oklch(84% .005 105)",
+          "oklch(95% .005 105)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "panel",
+        "canonical": "#20201e",
+        "tonalRamp": [
+          "oklch(15% .005 105)",
+          "oklch(26% .005 105)",
+          "oklch(38% .005 105)",
+          "oklch(49% .005 105)",
+          "oklch(61% .005 105)",
+          "oklch(72% .005 105)",
+          "oklch(84% .005 105)",
+          "oklch(95% .005 105)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "border",
+        "canonical": "#30302d",
+        "tonalRamp": [
+          "oklch(15% .005 105)",
+          "oklch(26% .005 105)",
+          "oklch(38% .005 105)",
+          "oklch(49% .005 105)",
+          "oklch(61% .005 105)",
+          "oklch(72% .005 105)",
+          "oklch(84% .005 105)",
+          "oklch(95% .005 105)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "text",
+        "canonical": "#dddeda",
+        "tonalRamp": [
+          "oklch(15% .005 105)",
+          "oklch(26% .005 105)",
+          "oklch(38% .005 105)",
+          "oklch(49% .005 105)",
+          "oklch(61% .005 105)",
+          "oklch(72% .005 105)",
+          "oklch(84% .005 105)",
+          "oklch(95% .005 105)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "canonical": "#999a92",
+        "tonalRamp": [
+          "oklch(15% .005 105)",
+          "oklch(26% .005 105)",
+          "oklch(38% .005 105)",
+          "oklch(49% .005 105)",
+          "oklch(61% .005 105)",
+          "oklch(72% .005 105)",
+          "oklch(84% .005 105)",
+          "oklch(95% .005 105)"
+        ]
+      },
+      "blue": {
+        "role": "primary",
+        "displayName": "blue",
+        "canonical": "#7db5df",
+        "tonalRamp": [
+          "oklch(15% .045 240)",
+          "oklch(26% .045 240)",
+          "oklch(38% .045 240)",
+          "oklch(49% .045 240)",
+          "oklch(61% .045 240)",
+          "oklch(72% .045 240)",
+          "oklch(84% .045 240)",
+          "oklch(95% .045 240)"
+        ]
+      },
+      "badge-bg": {
+        "role": "neutral",
+        "displayName": "badge-bg",
+        "canonical": "#283945",
+        "tonalRamp": [
+          "oklch(15% .045 240)",
+          "oklch(26% .045 240)",
+          "oklch(38% .045 240)",
+          "oklch(49% .045 240)",
+          "oklch(61% .045 240)",
+          "oklch(72% .045 240)",
+          "oklch(84% .045 240)",
+          "oklch(95% .045 240)"
+        ]
+      },
+      "badge-text": {
+        "role": "neutral",
+        "displayName": "badge-text",
+        "canonical": "#93adc0",
+        "tonalRamp": [
+          "oklch(15% .045 240)",
+          "oklch(26% .045 240)",
+          "oklch(38% .045 240)",
+          "oklch(49% .045 240)",
+          "oklch(61% .045 240)",
+          "oklch(72% .045 240)",
+          "oklch(84% .045 240)",
+          "oklch(95% .045 240)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Page title",
+        "purpose": "Modest interface title."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Answer and source text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metadata and controls."
+      }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      {
+        "name": "mobile-max",
+        "value": "640px"
+      },
+      {
+        "name": "wide-min",
+        "value": "1600px"
+      }
+    ],
+    "focus": {
+      "value": "2px solid #7db5df",
+      "offset": "3px"
+    },
+    "tonalRampNote": "Synthesized preview ramps only; implemented colors remain the canonical hex values."
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main query action.",
+      "html": "<button class=\"ds-primary\">Hỏi</button>",
+      "css": ".ds-primary{font:14px/1.5 Arial,Helvetica,sans-serif;background:var(--blue,#7db5df);color:#17232c;border:1px solid var(--blue,#7db5df);border-radius:5px;padding:8px 15px;font-weight:700;cursor:pointer}.ds-primary:hover{filter:brightness(1.14)}.ds-primary:disabled{opacity:.6;cursor:wait}.ds-primary:focus-visible{outline:2px solid var(--blue,#7db5df);outline-offset:3px}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Supporting actions.",
+      "html": "<button class=\"ds-secondary\">Đóng</button>",
+      "css": ".ds-secondary{font:14px/1.5 Arial,Helvetica,sans-serif;background:var(--panel,#20201e);color:var(--text,#dddeda);border:1px solid var(--border,#30302d);border-radius:5px;padding:7px 12px;cursor:pointer}.ds-secondary:hover{filter:brightness(1.14)}.ds-secondary:focus-visible{outline:2px solid var(--blue,#7db5df);outline-offset:3px}"
+    },
+    {
+      "name": "Text link",
+      "kind": "button",
+      "description": "Source excerpt action.",
+      "html": "<button class=\"ds-link\">Xem toàn bộ</button>",
+      "css": ".ds-link{font:14px/1.5 Arial,Helvetica,sans-serif;background:none;border:0;color:var(--blue,#7db5df);padding:0;cursor:pointer}.ds-link:hover{text-decoration:underline}.ds-link:focus-visible{outline:2px solid var(--blue,#7db5df);outline-offset:3px}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Local filter field.",
+      "html": "<input class=\"ds-input\" aria-label=\"Từ khóa văn bản\" placeholder=\"Số hiệu hoặc nội dung\">",
+      "css": ".ds-input{font:14px/1.5 Arial,Helvetica,sans-serif;background:var(--panel,#20201e);color:var(--text,#dddeda);border:1px solid var(--border,#30302d);border-radius:5px;padding:7px 10px}.ds-input:focus-visible{outline:2px solid var(--blue,#7db5df);outline-offset:3px}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "description": "Query mode buttons.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Chế độ tra cứu\"><button aria-pressed=\"true\">Hỏi đáp</button><button aria-pressed=\"false\">Báo cáo tổng hợp</button></nav>",
+      "css": ".ds-nav{display:flex;gap:4px;border-bottom:1px solid var(--border,#30302d)}.ds-nav button{font:14px/1.5 Arial,Helvetica,sans-serif;background:transparent;border:0;border-bottom:2px solid transparent;color:var(--muted,#999a92);padding:10px 12px;font-weight:700;cursor:pointer}.ds-nav button[aria-pressed=true]{color:var(--blue,#7db5df);border-bottom-color:var(--blue,#7db5df)}.ds-nav button:hover{filter:brightness(1.14)}.ds-nav button:focus-visible{outline:2px solid var(--blue,#7db5df);outline-offset:3px}"
+    },
+    {
+      "name": "Validity badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Compact validity metadata.",
+      "html": "<span class=\"ds-badge\">Hiệu lực chưa xác định</span>",
+      "css": ".ds-badge{font:11px/1.5 Arial,Helvetica,sans-serif;background:#283945;color:#93adc0;border-radius:3px;padding:1px 5px;white-space:nowrap}"
+    },
+    {
+      "name": "Source panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Evidence excerpt surface.",
+      "html": "<article class=\"ds-panel\">[1] 242-BC/UBKTTU<p>THÀNH ỦY HÀ NỘI</p></article>",
+      "css": ".ds-panel{font:14px/1.5 Arial,Helvetica,sans-serif;background:var(--panel,#20201e);color:var(--text,#dddeda);border:1px solid var(--border,#30302d);border-radius:7px;padding:13px 14px}.ds-panel p{margin:5px 0 0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The supplied PDF",
+    "overview": "The supplied PDF is the visual authority. Preserve its compact Vietnamese document interface: a dark reading surface, narrow centered content, restrained blue actions, and dense evidence lists. This is a faithful recreation rather than a new visual identity.",
+    "keyCharacteristics": [
+      "Compact Arial typography.",
+      "Flat dark panels with fine borders.",
+      "Blue actions and citations.",
+      "Dense document and source information."
+    ],
+    "rules": [
+      {
+        "name": "The Reference Rule",
+        "body": "Preserve the supplied PDF palette and density when extending this interface.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do preserve the PDF's compact hierarchy and reading order.",
+      "Do keep Vietnamese text, source citations, and metadata legible.",
+      "Do retain visible keyboard focus and native disclosure behavior."
+    ],
+    "donts": [
+      "Don't introduce a new color scheme, display font, imagery, or decorative motion.",
+      "Don't present fixture content as newly retrieved or generated information."
+    ]
+  }
+}
