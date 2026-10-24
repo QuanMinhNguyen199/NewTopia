@@ -11,6 +11,21 @@ npm run dev
 
 Mở http://127.0.0.1:5173. Đóng gói bản production bằng `npm run build`; kết quả nằm trong `dist/`.
 
+## GitHub Pages
+
+Website: https://quanminhnguyen199.github.io/NewTopia/
+
+Workflow `.github/workflows/deploy.yml` tự cài dependencies, build và triển khai thư mục `dist/` mỗi khi push lên `main`. Trong Settings → Pages, Source cần là **GitHub Actions**.
+
+Vite dùng base `/NewTopia/` khi build để JavaScript, CSS và font tải đúng trên GitHub Pages. Máy local vẫn dùng đường dẫn `/` khi chạy `npm run dev`.
+
+Kiểm tra bản production: chạy `npm run build`, sau đó `npm run preview`. Trong PowerShell khác:
+
+```powershell
+$env:CHECK_URL = 'http://127.0.0.1:4173/NewTopia/'
+node check.mjs
+```
+
 ## Nội dung
 
 - `src/main.jsx`: giao diện và các tương tác React.

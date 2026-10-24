@@ -5,7 +5,7 @@ const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Micr
 const page=await browser.newPage({viewport:{width:2056,height:1200},deviceScaleFactor:1});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const docCount=async()=>Number((await page.locator('#tab-docs .count').textContent()).split('/').pop());
-await page.goto('http://127.0.0.1:5173');
+await page.goto(process.env.CHECK_URL || 'http://127.0.0.1:5173');
 await page.screenshot({path:'.impeccable/review/desktop.png',fullPage:true});
 // Lớp 1: mỗi nhóm chỉ hiện ý đầu, mở thêm được.
 const initialBullets=await page.locator('.unit.open li').count();
