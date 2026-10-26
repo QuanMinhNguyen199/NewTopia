@@ -1,0 +1,7 @@
+dist
+node_modules
+public
+.impeccable
+.hallmark
+package-lock.json
+*.md

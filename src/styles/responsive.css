@@ -1,0 +1,477 @@
+/* Desktop: chia đôi; ngăn hồ sơ dính theo khi cuộn, thu gọn được thành dải. Không áp dụng khi nhúng. */
+@media (min-width: 1100px) {
+  main:not(.embed) {
+    max-width: 1240px;
+    padding-bottom: 24px;
+  }
+  main:not(.embed) .results {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 32px;
+    align-items: start;
+  }
+  main:not(.embed) .results.solo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  main:not(.embed) .results.railed {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+  main:not(.embed) .skip-link:focus {
+    grid-column: 1/-1;
+  }
+  main:not(.embed) .evidence {
+    position: sticky;
+    top: 0;
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding: 0 4px 16px 0;
+  }
+  .compact .evidence {
+    top: 57px;
+    max-height: calc(100dvh - 69px);
+  }
+  .compact.bar-hidden .evidence {
+    top: 0;
+    max-height: calc(100dvh - 24px);
+  }
+  main:not(.embed) .evidence-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--paper);
+    padding-top: 36px;
+  }
+  main:not(.embed) .evidence .section-head {
+    margin-top: 0;
+  }
+  main:not(.embed) .evidence-rail {
+    position: sticky;
+    top: 12px;
+    margin-top: 36px;
+  }
+  .compact .evidence-rail {
+    top: 72px;
+  }
+  .compact.bar-hidden .evidence-rail {
+    top: 12px;
+  }
+}
+/* Dưới 1100px: bằng chứng là panel trượt từ phải, mở bằng dải bám mép phải. Không áp dụng khi nhúng
+   hoặc khi trang không có câu trả lời (bằng chứng khi đó nằm trong trang). */
+@media (max-width: 1099px) {
+  main:not(.embed) {
+    padding-right: 60px;
+  }
+  main:not(.embed) .evidence-rail {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    z-index: 10;
+    transform: translateY(-50%);
+    border-right: 0;
+    border-radius: var(--radius-control) 0 0 var(--radius-control);
+  }
+  main:not(.embed) .results:not(.solo) .evidence {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    width: min(440px, calc(100% - 48px));
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 0 20px 24px;
+    background: var(--paper);
+    border-left: 1px solid var(--rule);
+    box-shadow: var(--shadow-dialog);
+    transform: translateX(100%);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      transform 0.2s ease-in,
+      visibility 0s 0.2s;
+  }
+  main:not(.embed) .results:not(.solo) .evidence.is-open {
+    transform: none;
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.26s var(--out);
+  }
+  main:not(.embed) .results:not(.solo) .evidence-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--paper);
+    padding-top: 16px;
+  }
+  main:not(.embed) .results:not(.solo) .evidence .section-head {
+    margin-top: 0;
+  }
+}
+/* Mobile: dải hẹp hơn để chữ câu trả lời mất ít chiều ngang nhất */
+@media (max-width: 640px) {
+  main:not(.embed) {
+    padding-right: 54px;
+  }
+  main:not(.embed) .evidence-rail {
+    width: 44px;
+    font-size: 13px;
+    padding: 14px 0 12px;
+  }
+  main:not(.embed) .results:not(.solo) .evidence {
+    padding: 0 16px 24px;
+  }
+}
+/* Mobile (không nhúng): ô Hỏi tiếp ghim đáy màn hình, trong tầm ngón cái, để hỏi câu mới.
+   Bám ngay trên bàn phím (--kb). Sửa câu hỏi hiện tại vẫn ở thanh trên đầu. */
+.mobile {
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+}
+.follow-up {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--kb, 0px);
+  z-index: 8;
+  display: flex;
+  gap: 8px;
+  padding: 12px max(14px, env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom))
+    max(14px, env(safe-area-inset-left));
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  box-shadow: var(--shadow-bar-up);
+}
+.follow-up input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 14px;
+  font-size: 16px;
+  background: var(--paper-alt);
+}
+.follow-up input:focus {
+  background: var(--paper);
+}
+.follow-up input::placeholder {
+  color: var(--ink-2);
+}
+.follow-up .primary {
+  padding: 0 20px;
+}
+/* Cuộn xuống: ô Hỏi tiếp trượt khuất xuống dưới, cùng lúc với thanh trên đầu */
+.follow-up {
+  transition: transform 0.22s var(--out);
+}
+.follow-up.is-hidden {
+  transform: translateY(calc(100% + 2px));
+  transition: transform 0.18s ease-in;
+}
+/* Nhúng trong khung chat GeoAgent: không đầu trang; trang không tự cuộn mà báo chiều cao cho khung chat.
+   Từ 720px chia đôi, cột bằng chứng cao bằng câu trả lời (tối thiểu 480px) và cuộn bên trong. */
+.embed {
+  max-width: none;
+  padding: 12px 16px 16px;
+}
+.embed-note {
+  margin: 0 0 4px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.embed .answer > .section-head:first-child {
+  margin-top: 12px;
+}
+.embed-wide .results {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+}
+.embed-wide .drawer-tabs {
+  gap: 16px;
+}
+.embed-wide .results.solo {
+  grid-template-columns: minmax(0, 1fr);
+}
+.embed-wide .results.railed {
+  grid-template-columns: minmax(0, 1fr) 44px;
+}
+.embed-wide .skip-link:focus {
+  grid-column: 1/-1;
+}
+.embed-wide .evidence {
+  height: 0;
+  min-height: max(100%, 480px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-right: 4px;
+}
+.embed-wide .results.solo .evidence {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+.embed-wide .evidence-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--paper);
+}
+.embed-wide .evidence .section-head {
+  margin-top: 12px;
+}
+.embed-wide .evidence-rail {
+  align-self: start;
+  margin-top: 12px;
+}
+.embed dialog {
+  position: absolute;
+  bottom: auto;
+  margin-top: 0;
+}
+@media (max-width: 1099px) {
+  .query-bar .timing {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  /* Điện thoại: hai nút xuống hàng riêng, căn phải, để ô nhập giữ trọn chiều ngang */
+  .search-row {
+    flex-wrap: wrap;
+  }
+  .search-row textarea {
+    flex-basis: 100%;
+  }
+  .search-actions {
+    margin-left: auto;
+  }
+  /* Mobile: hàng 1 chế độ tra cứu, hàng 2 câu hỏi và nút sửa; người dùng giả lập nằm trong form đầy đủ */
+  .query-bar {
+    flex-wrap: wrap;
+    gap: 0 12px;
+    padding-bottom: 8px;
+  }
+  .query-bar nav {
+    flex-basis: 100%;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 8px;
+  }
+  .query-bar .tab {
+    min-height: 44px;
+  }
+  .query-text {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .user-compact {
+    display: none;
+  }
+  .query-filters {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .query-bar .btn {
+    min-height: 40px;
+  }
+  main {
+    padding: 20px 14px 40px;
+  }
+  header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  nav {
+    margin: 16px 0;
+  }
+  .timing {
+    margin-left: 0;
+    width: 100%;
+  }
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+  .section-head {
+    margin-top: 28px;
+  }
+  /* Mobile: bỏ cột lề, nguồn hiện dưới tên đơn vị để chữ câu trả lời có trọn chiều ngang */
+  .unit {
+    display: block;
+  }
+  .unit-margin {
+    display: none;
+  }
+  .unit-main {
+    padding-left: 0;
+  }
+  .unit-row {
+    min-height: 56px;
+    padding: 8px 0;
+  }
+  .unit-label {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .unit-src {
+    display: inline;
+  }
+  .unit-body li,
+  .report-list li {
+    margin: 0 -6px 2px;
+    padding: 6px 6px 6px 20px;
+    line-height: 1.6;
+  }
+  .unit-body li::before,
+  .report-list li::before {
+    left: 7px;
+  }
+  /* Số chú thích: vùng chạm lớn hơn, hình thức không đổi */
+  .cite {
+    padding: 2px 7px;
+    margin-left: 4px;
+  }
+  .cited-btn {
+    min-height: 40px;
+  }
+  .query-options {
+    gap: 0 20px;
+  }
+  .check {
+    min-height: 40px;
+  }
+  .filter-toggle {
+    min-height: 40px;
+  }
+  .excerpt {
+    padding: 12px 14px;
+  }
+  .excerpt-actions {
+    gap: 0 16px;
+  }
+  .excerpt-actions .link-btn,
+  .show-all {
+    min-height: 44px;
+  }
+  .doc-top {
+    flex-wrap: wrap;
+    gap: 0 12px;
+  }
+  header p {
+    font-size: 13px;
+  }
+  .drawer-tabs {
+    gap: 20px;
+  }
+}
+.evidence:focus {
+  outline: none;
+}
+/* Giảm chuyển động: bỏ dịch chuyển và cuộn mượt, giữ đổi màu và độ mờ để vẫn thấy trạng thái */
+/* Mobile, góp ý 2026-10-26 (xem trên iPhone Safari) */
+/* Vùng chạm tối thiểu 44px trên màn hình cảm ứng: nút nhỏ giữ hình dáng, vùng bấm nở ra */
+@media (pointer: coarse) {
+  /* Giữ vùng chạm ổn định khi mở/đóng nhanh trên điện thoại. */
+  main:not(.embed) .results:not(.solo) .evidence,
+  main:not(.embed) .results:not(.solo) .evidence.is-open {
+    transition: none;
+  }
+  .evidence-rail {
+    animation: none;
+  }
+  .btn,
+  .link-btn,
+  .show-all,
+  .filter-toggle,
+  .relation-name,
+  .ref {
+    min-height: 44px;
+  }
+  .query-bar .btn,
+  .cited-btn,
+  .check,
+  .excerpt-actions .link-btn,
+  .context-line .link-btn {
+    min-height: 44px;
+  }
+  .cite {
+    position: relative;
+  }
+  .cite::after {
+    content: '';
+    position: absolute;
+    inset: -10px -6px;
+  }
+}
+/* Đoạn văn dài trên màn nhỏ: căn trái, xuống dòng cân đối, dòng thoáng hơn */
+.unit-body li,
+.report-list li,
+.report-lead,
+.excerpt-text,
+.doc-description {
+  text-align: left;
+  text-wrap: pretty;
+}
+@media (max-width: 640px) {
+  .unit-body li,
+  .report-list li {
+    line-height: 1.7;
+  }
+}
+/* Mở dạng ứng dụng (thêm vào màn hình chính): chừa vùng tai thỏ và thanh trạng thái */
+@media (display-mode: standalone) {
+  main {
+    padding-top: calc(20px + env(safe-area-inset-top));
+  }
+  .query-bar {
+    top: 0;
+    padding-top: env(safe-area-inset-top);
+  }
+  .query.floating {
+    top: calc(8px + env(safe-area-inset-top));
+  }
+  main:not(.embed) .results:not(.solo) .evidence-head {
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+  .excerpt.pulled {
+    animation: none;
+  }
+  .excerpt.inline,
+  .drawer,
+  dialog[open] {
+    animation: fade-in 0.15s ease-out;
+  }
+  .unit-body,
+  .unit.open .unit-body {
+    transition: opacity 0.15s ease-out;
+  }
+  .unit-row .icon,
+  .filter-toggle .icon,
+  .tab-ink,
+  .evidence,
+  .evidence.is-open {
+    transition: none;
+  }
+  .evidence-rail,
+  .evidence-rail .count {
+    animation: none;
+    transition: background-color 0.12s ease-out;
+  }
+  .query-bar,
+  .query-bar.is-hidden,
+  .compact .evidence,
+  .follow-up,
+  .follow-up.is-hidden {
+    transition: none;
+  }
+  .query.floating {
+    animation: fade-in 0.15s ease-out;
+  }
+  .evidence.docking {
+    animation: fade-in 0.15s ease-out;
+  }
+}

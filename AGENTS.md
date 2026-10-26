@@ -11,12 +11,22 @@ Hướng dẫn cho agent (Claude Code, Codex, Cursor…) khi làm việc trong t
 |---|---|
 | `PRODUCT.md` | Mục đích sản phẩm, ràng buộc, bằng chứng đang có |
 | `DESIGN.md` | Token màu, typography, spacing, component (nguồn sự thật về visual) |
-| `src/main.jsx` | Toàn bộ UI và tương tác |
-| `src/style.css` | Bố cục, responsive |
-| `src/data.js` | Dữ liệu mẫu: `answers`, `documents`, `relations`, `sources` |
-| `check.mjs` | Kiểm tra desktop/mobile bằng Playwright (Edge trên Windows) |
+| `src/main.jsx` | Điểm vào: nạp font, CSS, render `App` |
+| `src/App.jsx` | Ghép các phần và giữ state dùng chung (tìm kiếm, khớp bằng chứng, chế độ hiển thị) |
+| `src/components/` | Thành phần giao diện: `QueryBar`, `QueryForm`, `FollowUpForm`, `AnswerSection`/`AnswerUnit`/`Bullet`, `EvidenceDrawer`, `ReportSection`, `DocumentDialog`… |
+| `src/hooks/` | Hành vi tách riêng: `useQueryEditor` (sửa câu hỏi), `useEvidenceDrawer` (cột/panel bằng chứng), `useReadingViewport` (ẩn thanh khi cuộn, bàn phím), `useDocumentPreview` (hộp văn bản, báo chiều cao khi nhúng), `useMedia`, `useTabIndicator` |
+| `src/lib/api.js` | `searchDocuments(filters)`: hiện lọc dữ liệu mẫu. **Nối backend: thay thân hàm này**, giữ hình dạng kết quả |
+| `src/lib/fixture.js` | Chuyển dữ liệu mẫu sang object có tên trường (`{ code, date, description }`, `{ n, code, text, kind, date, pages, unit, issuer }`…) |
+| `src/lib/documents.js` | Phép tính trên dữ liệu: nhóm ý theo đơn vị, quan hệ, `citedBy`, `pointsUsing`, `sourceLine` |
+| `src/lib/config.js` | Mốc bề rộng, chế độ nhúng, khóa `localStorage` |
+| `src/style.css`, `src/styles/` | `style.css` chỉ `@import` theo thứ tự cascade; token ở `styles/tokens.css`, responsive ở cuối |
+| `src/data.js` | Dữ liệu mẫu chép từ PDF, giữ nguyên làm bản gốc. Chỉ `lib/fixture.js` đọc file này |
+| `check.mjs` | Kiểm tra hành vi desktop/tablet/mobile/nhúng bằng Playwright (Edge trên Windows) |
+| `tests/visual.mjs`, `check-touch.mjs` | So ảnh chụp 1440/375; thao tác chạm trên WebKit (iOS) và Chromium (Android) |
 
-Lệnh (chạy được từ `Replica/` hoặc `van-ban/`): `npm run dev` (http://127.0.0.1:5173), `npm run build`, `npm run preview`. Từ `Replica/`: `npm run check`, `npm run install:app`.
+Lệnh (chạy được từ `Replica/` hoặc `van-ban/`): `npm run dev` (http://127.0.0.1:5173), `npm run build`, `npm run preview`. Từ `Replica/`: `npm run check`, `npm run install:app`. Trong `van-ban/`: `npm run format` (Prettier), `npm run lint` (ESLint), `npm run check`.
+
+Trước khi bàn giao một thay đổi: `npm run format`, `npm run lint`, `npm run build`, rồi `npm run check` với dev server đang chạy ở cổng 5173. Component đọc dữ liệu qua `lib/fixture.js` hoặc `lib/documents.js`, không đọc thẳng `data.js` và không truy cập theo chỉ số (`d[0]`).
 
 Hướng dẫn chung cho mọi dự án và cách dùng skill nằm ở `~/.claude/CLAUDE.md` (Claude Code) và `~/.codex/AGENTS.md` (Codex). File này chỉ ghi phần riêng của dự án.
 

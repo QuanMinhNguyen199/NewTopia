@@ -1,0 +1,79 @@
+/* Nút phụ: viền mảnh hoặc chỉ chữ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+.btn:hover {
+  border-color: var(--ink-2);
+}
+/* Nút chính cỡ nhỏ: cùng màu nút Hỏi, dùng cho Sửa câu hỏi trên thanh câu hỏi. Phải đứng sau .btn để thắng nền trắng của .btn */
+.btn-primary {
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--on-action);
+  font-weight: 700;
+}
+.btn-primary:hover {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
+}
+/* Nút chính cỡ nhỏ: cùng màu nút Hỏi, dùng cho Sửa câu hỏi trên thanh câu hỏi */
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font-size: 14px;
+  font-weight: 500;
+}
+.link-btn:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Tiêu đề và khoảng cách phân cấp các phần, không thêm đường kẻ trang trí */
+h2 {
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 700;
+  margin: 0;
+}
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  margin-top: 36px;
+}
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  position: static;
+  display: inline-block;
+  margin: 16px 0 0;
+  padding: 6px 10px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  color: var(--link);
+  font-weight: 500;
+}

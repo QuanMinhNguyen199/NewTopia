@@ -1,0 +1,62 @@
+* {
+  box-sizing: border-box;
+}
+/* Không bao giờ cuộn ngang; clip (không phải hidden) để position: sticky vẫn hoạt động */
+html,
+body {
+  overflow-x: clip;
+}
+html {
+  scrollbar-gutter: stable;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 500 15px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 16px 72px;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  touch-action: manipulation;
+  cursor: pointer;
+  transition:
+    color 0.12s ease-out,
+    background-color 0.12s ease-out,
+    border-color 0.12s ease-out;
+}
+::selection {
+  background: var(--selection);
+}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+* {
+  scrollbar-color: var(--scrollbar) transparent;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.icon {
+  flex: none;
+}
+.muted {
+  color: var(--ink-2);
+  font-size: 13px;
+}

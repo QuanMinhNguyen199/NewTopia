@@ -1,0 +1,125 @@
+/* Số chú thích kiểu chú thích cuối trang */
+.cite {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-small);
+  background: var(--paper);
+  color: var(--link);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+  vertical-align: 1px;
+}
+.cite:hover {
+  background: var(--wash);
+  border-color: var(--link);
+}
+.cite[aria-expanded='true'],
+.cite.is-active {
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--on-action);
+}
+
+/* Tờ trích: giấy, chữ Times như văn bản hành chính */
+.excerpt {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--edge);
+  padding: 14px 16px;
+  margin: 12px 0;
+  scroll-margin-top: 120px;
+  transition: border-color 0.2s ease-out;
+}
+.excerpt.active {
+  border-color: var(--action);
+}
+/* Khoảnh khắc chính: rút tờ trích khỏi ngăn hồ sơ */
+.excerpt.pulled {
+  animation: pull 0.52s var(--out);
+}
+@keyframes pull {
+  0% {
+    transform: translateX(0);
+    box-shadow: var(--edge);
+  }
+  35% {
+    transform: translateX(-10px);
+    box-shadow: var(--shadow-pull);
+  }
+  100% {
+    transform: translateX(0);
+    box-shadow: var(--edge);
+  }
+}
+.excerpt.inline {
+  margin: 8px 0 12px;
+  background: var(--paper-alt);
+  box-shadow: none;
+  animation: reveal 0.26s var(--out);
+}
+@keyframes reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0.4;
+  }
+  to {
+    clip-path: inset(0);
+    opacity: 1;
+  }
+}
+.source-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.source-no {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.excerpt.active .source-no {
+  color: var(--action);
+}
+.doc-no {
+  color: var(--seal);
+  font-weight: 700;
+}
+.source-meta {
+  display: flex;
+  flex-direction: column;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+.source-meta .issuer {
+  color: var(--ink);
+  font-weight: 700;
+}
+.excerpt-text {
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-line;
+  margin: 10px 0 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.excerpt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+}

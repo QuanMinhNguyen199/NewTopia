@@ -1,0 +1,247 @@
+/* Ngăn hồ sơ: mép phân trang trên nền tint, mép đang chọn nối liền với ngăn trắng */
+.evidence .section-head {
+  margin-bottom: 4px;
+}
+.drawer-tabs {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  border-bottom: 1px solid var(--rule);
+}
+.drawer-tabs [role='tab'] {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.drawer-tabs [role='tab']:hover {
+  color: var(--ink);
+}
+.drawer-tabs [aria-selected='true'] {
+  color: var(--ink);
+  font-weight: 700;
+}
+.count {
+  color: var(--ink-2);
+  font-weight: 400;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.drawer-tabs [aria-selected='true'] .count {
+  color: var(--action);
+  font-weight: 700;
+}
+/* Vạch mực trượt tới tab vừa chọn */
+.tab-ink {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100px;
+  height: 2px;
+  background: var(--action);
+  transform-origin: 0 0;
+  transition: transform 0.22s var(--out);
+}
+.drawer {
+  animation: panel-in 0.18s ease-out;
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.panel-note {
+  margin: 12px 0 0;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+/* Dòng ngữ cảnh khi cột bằng chứng đang khớp với các đơn vị đang mở */
+.context-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 12px;
+  margin: 0;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--ink-2);
+  animation: fade-in 0.18s ease-out;
+}
+.context-line strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.context-line .link-btn {
+  font-size: 13px;
+  min-height: 28px;
+}
+.document {
+  position: relative;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.doc-list > :last-child {
+  border-bottom: 0;
+}
+.doc-top {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.doc-open {
+  margin-right: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  white-space: nowrap;
+}
+.doc-open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.doc-open:focus-visible {
+  outline: none;
+}
+.document:has(.doc-open:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.document:hover .doc-open {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.doc-top time {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.doc-description {
+  margin: 2px 0 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Nút trên dòng văn bản nằm trên vùng bấm kéo giãn của số hiệu */
+.cited-btn {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--link);
+}
+.cited-btn:hover {
+  border-color: var(--link);
+  background: var(--wash);
+}
+.show-all {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font-size: 14px;
+  font-weight: 500;
+}
+.show-all:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.empty {
+  padding: 16px 0;
+}
+.empty p {
+  margin: 0 0 10px;
+  color: var(--ink-2);
+}
+.relation-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 8px;
+  min-height: 32px;
+  margin: 12px 0 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.relation-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.relation-row:last-child {
+  border-bottom: 0;
+}
+.relation-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.relation-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 700;
+  text-align: left;
+}
+.relation-name:hover {
+  color: var(--link);
+}
+.relation-row p {
+  margin: 2px 0 0;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.ref {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font-weight: 500;
+}
+.ref:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.badge {
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-paper);
+  padding: 0 5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.excerpt-list {
+  padding-top: 4px;
+}

@@ -1,0 +1,55 @@
+/* Hộp xem văn bản */
+dialog {
+  width: min(760px, calc(100% - 32px));
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-surface);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-dialog);
+}
+dialog[open] {
+  animation: dialog-in 0.2s var(--out);
+}
+dialog[open]::backdrop {
+  background: var(--backdrop);
+  animation: fade-in 0.2s ease-out;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dialog-heading h2 {
+  color: var(--seal);
+}
+.dialog-meta {
+  color: var(--ink-2);
+  font-size: 14px;
+  margin: 6px 0 14px;
+}
+#dialog-content {
+  font-family: var(--serif);
+  font-size: 17px;
+  white-space: pre-line;
+  line-height: 1.7;
+  padding: 16px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.dialog-foot {
+  color: var(--ink-2);
+  font-size: 13px;
+  margin: 12px 0 0;
+}
