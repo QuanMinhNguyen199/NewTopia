@@ -144,7 +144,7 @@ Metadata is written as plain Vietnamese, never as a dot-joined chain. Example: i
 
 The memorable element is the file drawer and its sheets; everything else stays quiet.
 
-- **Page.** One white page; no grey canvas, no cards. Sections open with a 2px ink rule above a 17/700 title, with the section action at the right. Below 1100px: a single column, 1000px maximum, 16px gutters (14px at ≤640px); below 1100px the right gutter is 60px (46px at ≤640px) to clear the evidence rail.
+- **Page.** One white page; no grey canvas, no cards. Sections open with a 17/700 title, with the section action at the right. Below 1100px: a single column, 1000px maximum, 16px gutters (14px at ≤640px); below 1100px the right gutter is 60px (46px at ≤640px) to clear the evidence rail.
 - **Header.** The title (22/700) and the two original demo lines on the left, a plain labelled user select on the right. There is no logo tile.
 - **Query.** The auto-growing question field with the Hỏi button beside it (both 48px, 8px radius). Below it, one row:
   - the two original checkboxes;
@@ -227,7 +227,7 @@ Every change is checked against this list. A banned pattern may come back only i
 | Inline excerpt (mobile) | Reveals top-down with `clip-path: inset(0 0 100% 0)→inset(0)`. | 260ms | Opacity only |
 | Tab change | The 2px ink line slides to the chosen tab (`translateX` plus `scaleX` on a fixed 100px line, transform only); the new panel fades in over a 4px vertical shift. | 220ms line, 180ms panel | The line jumps; the panel fades only |
 | Evidence panel (below 1100px) | Slides in from the right (`translateX(100%)→0`); the scrim fades. Closing slides out faster. | 260ms in `cubic-bezier(.16,1,.3,1)`, 200ms out | Appears and disappears without sliding |
-| Evidence rail | Slides in from the right edge when it appears (`translate: 100% → 0` plus opacity); on hover it pulls 4px out. | 360ms in, 200ms hover, `cubic-bezier(.16,1,.3,1)` | No slide; colour change only |
+| Evidence rail | Slides in from the right edge when it appears (`translate: 100% → 0` plus opacity); hover changes colour only. | 360ms in, 120ms hover, `cubic-bezier(.16,1,.3,1)` | No slide; colour change only |
 | Drawer reopens (≥1100px) | Slides in 24px from the right with opacity, the same direction as the rail. | 280ms `cubic-bezier(.16,1,.3,1)` | Opacity only |
 | Query bar and follow-up hide/show | The top bar slides up and the mobile follow-up field slides down by their own height when scrolling down; both return when scrolling up. | 180ms out `ease-in`, 220ms in `cubic-bezier(.16,1,.3,1)` | Appears and disappears without sliding |
 | In-place edit form | Drops 12px into place with opacity. | 220ms `cubic-bezier(.16,1,.3,1)` | Opacity only |
@@ -239,7 +239,7 @@ Collapsed unit content stays rendered for the animation but is `inert` and `aria
 
 ## Elevation & Depth
 
-There is no elevation system. Paper sheets have a 1px paper-edge shadow; a pulled sheet deepens it briefly. The dialog and the in-place edit sheet have one soft shadow. The evidence rail and the tablet evidence panel are the only other shadowed objects. Every shadow is a token in `:root` (`--edge`, `--shadow-pull`, `--shadow-rail`, `--shadow-sheet`, `--shadow-dialog`, `--shadow-bar-up`), as is the ink on navy (`--on-action`, and `--on-action-rule` for the rule inside the rail); no colour literal appears outside the token block (Hallmark audit, 2026-10-26). Focus is a 2px `focus` outline with 2px offset.
+There is no elevation system. Paper sheets have a 1px paper-edge shadow; a pulled sheet deepens it briefly. The dialog and the in-place edit sheet have one soft shadow. The tablet evidence panel also uses a shadow; the evidence rail is flat. Every shadow is a token in `:root` (`--edge`, `--shadow-pull`, `--shadow-sheet`, `--shadow-dialog`, `--shadow-bar-up`), as is the ink on navy (`--on-action`, and `--on-action-rule` for the rule inside the rail); no colour literal appears outside the token block (Hallmark audit, 2026-10-26). Focus is a 2px `focus` outline with 2px offset.
 
 ## Components
 
@@ -259,3 +259,15 @@ There is no elevation system. Paper sheets have a 1px paper-edge shadow; a pulle
 - Do retain visible focus, native disclosure, and 24px text-action targets.
 - Don't add drop shadows, gradient washes, all-caps eyebrows, or identical card grids.
 - Don't present fixture content as newly retrieved or generated information.
+
+## Visual simplification (2026-10-26)
+
+At the user’s request, section headings (including Bằng chứng and Câu trả lời) use typography and spacing without a top rule. Removed the filter footer rule, the vertical divider before the query text, and the extra navy line on an expanded unit’s source margin. The evidence rail has no shadow, hover translation or count flash. Keep list separators, input borders, selected-tab indicators and keyboard focus outlines: they convey grouping or interaction. These are design decisions; usability improvements have not been measured with users.
+
+## Touch drawer reliability (2026-10-26)
+
+On coarse pointers, the evidence drawer opens/closes without a sliding transition and its rail appears without an entrance animation, keeping hit targets stable during repeated taps. A closed drawer immediately has pointer-events:none. The mobile rail is 44px wide with a 54px page gutter. Buttons use touch-action:manipulation (pinch zoom stays available). Closing restores focus without scrolling; on Safari, where a tapped button may not receive focus, the rail is the fallback. The query form is inert while the drawer is open. Automated touch checks cover WebKit and Chromium; physical iPhone verification remains outstanding.
+
+## Stable unit headings (2026-10-26)
+
+Source labels retain the same text (for example, Nguồn 6) and DOM position when a unit opens or closes. Only the source details and answer body expand below. Unit headings and source margins remain in normal document flow rather than becoming sticky on expansion. The page reserves scrollbar space to avoid horizontal movement when content becomes scrollable. This supersedes earlier sticky unit-heading/source-margin guidance.

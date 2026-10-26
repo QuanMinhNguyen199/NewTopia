@@ -152,14 +152,6 @@ function App(){
  },[editing]);
  // Đang đọc ý nào (trỏ chuột hoặc focus): tô sáng nguồn tương ứng ở lề của đơn vị đó.
  const [readingAt,setReadingAt]=useState(null);
- // Chiều cao thanh câu hỏi đang hiện (0 khi ẩn hoặc không có): lề nguồn và tên đơn vị bám ngay dưới nó.
- useEffect(()=>{
-  const root=document.documentElement,bar=document.querySelector('.query-bar');
-  if(!bar||barHidden){root.style.setProperty('--bar-h','0px');return}
-  const set=()=>root.style.setProperty('--bar-h',`${bar.offsetHeight}px`);
-  const observer=new ResizeObserver(set);observer.observe(bar);set();
-  return()=>observer.disconnect();
- },[barHidden,editing,mobile,wide]);
  // Panel bằng chứng (dưới 1100px): mở thì đưa focus vào panel.
  useEffect(()=>{if(behind)document.getElementById('evidence')?.focus({preventScroll:true})},[behind]);
  const filterCount=[keyword,kind,from,to].filter(Boolean).length;
@@ -214,9 +206,9 @@ function App(){
  function dock(open){setDocked(open);setDocking(open);try{localStorage.setItem(DOCKED_KEY,open?'1':'0')}catch{}}
  function openEvidence(){
   if(wide&&!docked)dock(true);
-  if(panel&&!panelOpen){opener.current=document.activeElement;setPanelOpen(true)}
+  if(panel&&!panelOpen){opener.current=document.activeElement instanceof HTMLElement&&document.activeElement!==document.body?document.activeElement:railButton.current;setPanelOpen(true)}
  }
- function closePanel(){setPanelOpen(false);requestAnimationFrame(()=>(opener.current?.isConnected?opener.current:railButton.current)?.focus())}
+ function closePanel(){setPanelOpen(false);requestAnimationFrame(()=>(opener.current?.isConnected?opener.current:railButton.current)?.focus({preventScroll:true}))}
  function collapseEvidence(){dock(false);requestAnimationFrame(()=>railButton.current?.focus())}
  // Khi nhúng, khung iframe cao bằng nội dung nên hộp văn bản phải mở cạnh chỗ vừa bấm, không phải giữa khung.
  function openDocument(title,content,meta){
@@ -319,12 +311,11 @@ function App(){
   const reading=readingAt?.unit===group.unit?readingAt.src:null;
   const pick=e=>{const li=e.target.closest?.('li[data-src]');if(li)setReadingAt({unit:group.unit,src:Number(li.dataset.src)})};
   return <section className={`unit ${open?'open':''}`} key={group.unit}>
-   {/* Lề nguồn: đóng thì một dòng "Nguồn 3, 4"; mở thì liệt kê [n] kèm số hiệu văn bản, bám theo khi cuộn qua đơn vị,
-       và tô sáng nguồn của ý đang được trỏ hoặc focus. */}
-   <div className="unit-margin">{open
-    ?<div className="margin-inner"><p className="margin-label">Nguồn</p>
-      <ul className="margin-srcs">{srcs.map(n=><li key={n} className={reading===n?'is-current':undefined}><span className="m-n">[{n}]</span><span className="m-doc">{sources[n-1][0]}</span></li>)}</ul></div>
-    :<p className="margin-closed">Nguồn {srcs.join(', ')}</p>}</div>
+   {/* Nhãn nguồn giữ nguyên ở cả hai trạng thái; chi tiết chỉ mở bên dưới. */}
+   <div className="unit-margin"><div className="margin-inner">
+    <p className="margin-label">Nguồn {srcs.join(', ')}</p>
+    {open&&<ul className="margin-srcs">{srcs.map(n=><li key={n} className={reading===n?'is-current':undefined}><span className="m-n">[{n}]</span><span className="m-doc">{sources[n-1][0]}</span></li>)}</ul>}
+   </div></div>
    <div className="unit-main">
     <h3><button type="button" className="unit-row" aria-expanded={open} aria-controls={panel} onClick={()=>toggleGroup(group.unit)}><span className="unit-label"><span className="unit-name">{group.unit}</span><span className="unit-sub">{group.items.length} ý<span className="unit-src">, nguồn {srcs.join(', ')}</span></span></span><Icon name="down"/></button></h3>
     <div className="unit-body" id={panel} inert={!open} aria-hidden={!open}><div className="unit-inner"><ul onMouseOver={pick} onFocus={pick} onMouseLeave={()=>setReadingAt(null)}>{group.items.map(item=><Bullet key={item.id} {...bulletProps(item)}/>)}</ul></div></div>
@@ -349,7 +340,7 @@ function App(){
  {modeNav}
  </>:<h1 className="sr-only">Tra cứu và tổng hợp văn bản</h1>}
 
- {!EMBED&&(editing?<form onSubmit={search} className={`query ${floating?'floating':''}`} aria-label={floating?'Sửa câu hỏi':undefined} onKeyDown={e=>{if(e.key==='Escape'&&e.target.tagName!=='SELECT'){e.preventDefault();cancelEdit()}}}>
+ {!EMBED&&(editing?<form onSubmit={search} inert={behind} className={`query ${floating?'floating':''}`} aria-label={floating?'Sửa câu hỏi':undefined} onKeyDown={e=>{if(e.key==='Escape'&&e.target.tagName!=='SELECT'){e.preventDefault();cancelEdit()}}}>
   <div className="search-row">
    <label className="sr-only" htmlFor="question">Câu hỏi tra cứu</label>
    <textarea id="question" ref={questionField} rows="1" value={question} required onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();e.currentTarget.form.requestSubmit()}}}/>
