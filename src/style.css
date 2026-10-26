@@ -81,6 +81,9 @@ html{scroll-padding-top:72px}
 /* Nút phụ: viền mảnh hoặc chỉ chữ */
 .btn{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border:1px solid var(--rule-strong);border-radius:4px;background:var(--paper);color:var(--ink);font-size:14px;font-weight:500}
 .btn:hover{border-color:var(--ink-2)}
+/* Nút chính cỡ nhỏ: cùng màu nút Hỏi, dùng cho Sửa câu hỏi trên thanh câu hỏi */
+.btn-primary{background:var(--action);border-color:var(--action);color:#fff;font-weight:600}
+.btn-primary:hover{background:var(--action-hover);border-color:var(--action-hover)}
 .link-btn{display:inline-flex;align-items:center;min-height:32px;padding:0;border:0;background:none;color:var(--link);font-size:14px;font-weight:500}
 .link-btn:hover{text-decoration:underline;text-underline-offset:3px}
 
