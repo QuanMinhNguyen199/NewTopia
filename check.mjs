@@ -7,11 +7,12 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const docCount=async()=>Number((await page.locator('#tab-docs .count').textContent()).split('/').pop());
 await page.goto(process.env.CHECK_URL || 'http://127.0.0.1:5173');
 await page.screenshot({path:'.impeccable/review/desktop.png',fullPage:true});
-// Đã có kết quả: khối câu hỏi thu thành thanh, mở lại bằng Sửa câu hỏi, Hủy sửa trả về câu hỏi cũ.
+// Đã có kết quả: khối câu hỏi thu thành thanh, mở lại bằng Sửa câu hỏi, Hủy trả về câu hỏi cũ.
 if(!await page.locator('.query-bar').isVisible()||await page.locator('#question').count())throw Error('Collapsed query bar missing');
+if(await page.getByRole('button',{name:'Sửa câu hỏi'}).evaluate(e=>getComputedStyle(e).backgroundColor)!=='rgb(29, 62, 115)')throw Error('Sửa câu hỏi should be the navy primary button');
 await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
 await page.locator('#question').fill('câu hỏi tạm');
-await page.getByRole('button',{name:'Hủy sửa'}).click();
+await page.getByRole('button',{name:'Hủy'}).click();
 if(!(await page.locator('.query-text').textContent()).includes('Nghị quyết 57'))throw Error('Cancel edit failed');
 // Bấm ra ngoài khi đang sửa: form thu lại, thanh vẫn hiện câu hỏi cũ, mở lại thì còn bản gõ dở.
 await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
@@ -20,9 +21,9 @@ await page.locator('#answer-title').click();
 if(await page.locator('#question').count()||!(await page.locator('.query-text').textContent()).includes('Nghị quyết 57'))throw Error('Click outside should dismiss editing');
 await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
 if(await page.locator('#question').inputValue()!=='bản gõ dở')throw Error('Draft should survive click outside');
-await page.locator('.filters summary').click();
+await page.locator('.filter-toggle').click();
 if(!await page.locator('#question').count())throw Error('Clicks inside the form must not dismiss it');
-await page.getByRole('button',{name:'Hủy sửa'}).click();
+await page.getByRole('button',{name:'Hủy'}).click();
 // Lớp 1: mỗi nhóm chỉ hiện ý đầu, mở thêm được.
 const initialBullets=await page.locator('.unit.open li').count();
 await page.getByRole('button',{name:/Mở cả \d+ ý/}).click();
@@ -47,9 +48,9 @@ if(await page.locator('header').count()||!await page.locator('.query-bar [role=t
 // Cuộn xuống: thanh câu hỏi trượt khuất; cuộn lên: hiện lại.
 await page.getByRole('button',{name:/Mở cả \d+ ý/}).click();
 await page.mouse.move(600,600);
-await page.mouse.wheel(0,900);await page.waitForTimeout(400);
+await page.mouse.wheel(0,400);await page.waitForTimeout(400);
 if(!await page.locator('.query-bar.is-hidden').count())throw Error('Query bar should hide on scroll down');
-await page.mouse.wheel(0,-300);await page.waitForTimeout(400);
+await page.mouse.wheel(0,-150);await page.waitForTimeout(400);
 if(await page.locator('.query-bar.is-hidden').count())throw Error('Query bar should show on scroll up');
 await page.evaluate(()=>scrollTo(0,0));
 await page.getByRole('button',{name:'Thu gọn tất cả',exact:true}).first().click();
@@ -61,9 +62,9 @@ if(!await page.locator('#evidence').isVisible()||await page.locator('#panel-sour
 await page.locator('.context-line').getByRole('button',{name:'Hiện tất cả'}).click();
 // Lọc, xóa lọc.
 await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
-await page.locator('.filters summary').click();
+await page.locator('.filter-toggle').click();
 await page.getByPlaceholder('Số hiệu hoặc nội dung').fill('150/BC');
-await page.getByRole('button',{name:'Hỏi',exact:true}).click();
+await page.getByRole('button',{name:'Xác nhận',exact:true}).click();
 await page.waitForTimeout(350);
 await page.locator('#tab-docs').click();
 if(await docCount()!==1||await page.locator('.document').count()!==1)throw Error('Keyword filter failed');
@@ -107,6 +108,41 @@ if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))thro
 await page.reload();
 await page.setViewportSize({width:390,height:844});
 await page.screenshot({path:'.impeccable/review/mobile.png',fullPage:true});
+// Mobile: sửa câu hỏi tại chỗ khi đang đọc giữa trang, không phải cuộn lên đầu.
+await page.getByRole('button',{name:/Mở cả \d+ ý/}).click();
+await page.evaluate(()=>scrollTo(0,1500));await page.waitForTimeout(200);
+await page.mouse.move(150,500);await page.mouse.wheel(0,-60);await page.waitForTimeout(400);
+const yBefore=await page.evaluate(()=>scrollY);
+await page.getByRole('button',{name:'Sửa câu hỏi'}).click();await page.waitForTimeout(350);
+const fieldTop=await page.locator('#question').evaluate(e=>e.getBoundingClientRect().top);
+if(fieldTop<0||fieldTop>80)throw Error(`In-place edit field not at top of screen (${fieldTop})`);
+if(await page.locator('.follow-up').count())throw Error('Follow-up composer should hide while editing');
+if(await page.locator('header').count())throw Error('In-place edit should not render the full header');
+await page.screenshot({path:'.impeccable/review/mobile-inplace.png'});
+await page.getByRole('button',{name:'Hủy'}).click();await page.waitForTimeout(300);
+const yAfter=await page.evaluate(()=>scrollY);
+if(Math.abs(yAfter-yBefore)>120)throw Error(`Cancel should keep reading position (${yBefore}→${yAfter})`);
+await page.getByRole('button',{name:'Sửa câu hỏi'}).click();await page.waitForTimeout(300);
+await page.getByRole('button',{name:'Xác nhận',exact:true}).click();await page.waitForTimeout(1200);
+const resultsTop=await page.locator('#results').evaluate(e=>e.getBoundingClientRect().top);
+if(resultsTop<-5||resultsTop>140)throw Error(`Submit should bring results to top (${resultsTop})`);
+await page.getByRole('button',{name:'Thu gọn tất cả',exact:true}).first().click();
+// Mobile: ô Hỏi tiếp ghim đáy; câu mới thay kết quả, thanh trên đầu hiện câu mới.
+const composer=page.locator('.follow-up');
+if(await composer.evaluate(e=>getComputedStyle(e).position)!=='fixed'||await composer.evaluate(e=>Math.abs(e.getBoundingClientRect().bottom-innerHeight)>2))throw Error('Follow-up composer should be pinned to the bottom');
+// Cuộn xuống: ô Hỏi tiếp trượt khuất; cuộn lên: hiện lại.
+await page.getByRole('button',{name:/Mở cả \d+ ý/}).click();
+await page.evaluate(()=>scrollTo(0,300));await page.waitForTimeout(100);
+await page.mouse.move(150,400);await page.mouse.wheel(0,500);await page.waitForTimeout(400);
+if(!await page.locator('.follow-up.is-hidden').count())throw Error('Follow-up should hide on scroll down');
+await page.mouse.wheel(0,-200);await page.waitForTimeout(400);
+if(await page.locator('.follow-up.is-hidden').count())throw Error('Follow-up should show on scroll up');
+await page.getByRole('button',{name:'Thu gọn tất cả',exact:true}).first().click();
+await page.getByLabel('Hỏi tiếp hoặc hỏi câu mới').fill('tiến độ chuyển đổi số cấp xã');
+await page.keyboard.press('Enter');await page.waitForTimeout(900);
+if(!(await page.locator('.query-text').textContent()).includes('chuyển đổi số cấp xã'))throw Error('Follow-up should become the current question');
+if(await page.getByLabel('Hỏi tiếp hoặc hỏi câu mới').inputValue()!=='')throw Error('Follow-up field should clear after asking');
+await page.evaluate(()=>scrollTo(0,0));
 // Mobile một cột: [n] mở đoạn trích ngay dưới ý.
 if(await page.locator('.results').evaluate(e=>getComputedStyle(e).display)==='grid')throw Error('Mobile should be single column');
 await page.locator('.answer .cite').first().click();

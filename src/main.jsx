@@ -74,7 +74,7 @@ function useMedia(query){
 const params=new URLSearchParams(location.search);
 const EMBED=params.has('embed')||window.self!==window.top;
 const START_TAB=params.get('mode')==='report'?'report':'qa';
-const EMBED_WIDE='(min-width: 720px)';
+const EMBED_WIDE='(min-width: 720px)',MOBILE='(max-width: 767px)';
 // Chiều cao nội dung gửi cho GeoAgent để khung iframe co giãn theo. Nên đặt VITE_GEOAGENT_ORIGIN khi có địa chỉ thật.
 const HOST_ORIGIN=import.meta.env.VITE_GEOAGENT_ORIGIN||'*';
 const DOCKED_KEY='van-ban:evidence-docked';
@@ -103,12 +103,16 @@ function Bullet(props){
 
 function App(){
  const [tab,setTab]=useState(START_TAB),[question,setQuestion]=useState('việc triển khai Nghị quyết 57 như thế nào'),[user,setUser]=useState('leader');
+ const [filtersOpen,setFiltersOpen]=useState(false);
  const [keyword,setKeyword]=useState(''),[kind,setKind]=useState(''),[from,setFrom]=useState(''),[to,setTo]=useState('');
  const [auto,setAuto]=useState(true),[llm,setLlm]=useState(true),[showAnswer,setShowAnswer]=useState(true),[second,setSecond]=useState(false);
  const [notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[result,setResult]=useState(documents),[selected,setSelected]=useState(null);
  const [expanded,setExpanded]=useState([groups[0].unit]),[openCite,setOpenCite]=useState(null),[evidence,setEvidence]=useState('docs'),[allDocs,setAllDocs]=useState(false);
  const [activeSource,setActiveSource]=useState(null),[pull,setPull]=useState(0),[evidenceAll,setEvidenceAll]=useState(true),[docFocus,setDocFocus]=useState(null),[announce,setAnnounce]=useState('');
- const wideScreen=useMedia(WIDE),splitScreen=useMedia(SPLIT),wideEmbed=useMedia(EMBED_WIDE);
+ const wideScreen=useMedia(WIDE),splitScreen=useMedia(SPLIT),wideEmbed=useMedia(EMBED_WIDE),narrowScreen=useMedia(MOBILE);
+ // Mobile (không nhúng): ô "Hỏi tiếp" ghim ở đáy màn hình để hỏi câu mới; sửa câu hỏi hiện tại vẫn dùng thanh trên đầu.
+ const mobile=!EMBED&&narrowScreen;
+ const [followUp,setFollowUp]=useState(''),followField=useRef(null);
  const wide=EMBED?wideEmbed:wideScreen,split=EMBED?wideEmbed:splitScreen;
  // Đã có kết quả thì khối câu hỏi thu thành một thanh; "applied" là câu hỏi và bộ lọc của kết quả đang hiện.
  const [editing,setEditing]=useState(false),[applied,setApplied]=useState({question,keyword,kind,from,to});
@@ -128,15 +132,18 @@ function App(){
  },[evidence,wide,result.length,expanded,evidenceAll,evidenceShown]);
  // Ô câu hỏi tự giãn theo nội dung, mặc định một dòng bằng chiều cao nút Hỏi.
  useEffect(()=>{const el=questionField.current;if(!el)return;el.style.height='auto';el.style.height=`${el.scrollHeight+2}px`},[question,wide,editing]);
- // Thanh câu hỏi: cuộn xuống để đọc thì trượt khuất, cuộn lên thì hiện lại. Ở đầu trang luôn hiện.
+ // Thanh câu hỏi (và ô Hỏi tiếp trên mobile): cuộn xuống để đọc thì trượt khuất, cuộn lên thì hiện lại.
+ // Luôn hiện ở đầu trang, ở cuối trang (lúc thường muốn hỏi tiếp) và khi đang thao tác trong thanh.
  const [barHidden,setBarHidden]=useState(false);
  useEffect(()=>{
   if(EMBED||editing){setBarHidden(false);return}
   let last=window.scrollY;
   const onScroll=()=>{
    const y=window.scrollY,delta=y-last;
-   if(y<80)setBarHidden(false);
-   else if(delta>8&&!document.querySelector('.query-bar')?.contains(document.activeElement))setBarHidden(true);
+   const atEnd=y+window.innerHeight>=document.documentElement.scrollHeight-40;
+   const busyHere=document.activeElement?.closest?.('.query-bar, .follow-up');
+   if(y<80||atEnd)setBarHidden(false);
+   else if(delta>8&&!busyHere)setBarHidden(true);
    else if(delta<-8)setBarHidden(false);
    if(Math.abs(delta)>8||y<80)last=y;
   };
@@ -149,17 +156,38 @@ function App(){
  const appliedFilters=[applied.keyword,applied.kind,applied.from,applied.to].filter(Boolean).length;
  const allOpen=expanded.length===groups.length;
 
+ // Sửa tại chỗ: đang đọc giữa trang thì form mở thành khung bám đầu màn hình (không kèm đầu trang),
+ // và giữ nguyên chỗ đang đọc bằng cách đo một phần tử mốc trước và sau khi đổi bố cục.
+ const [floating,setFloating]=useState(false),anchor=useRef(null);
+ function keepPlace(){
+  const el=document.elementFromPoint(window.innerWidth/2,window.innerHeight*0.6);
+  if(el&&!el.closest('.query, .query-bar'))anchor.current={el,top:el.getBoundingClientRect().top};
+ }
+ useLayoutEffect(()=>{
+  const a=anchor.current;anchor.current=null;
+  if(a?.el.isConnected){const d=a.el.getBoundingClientRect().top-a.top;if(Math.abs(d)>1)window.scrollBy(0,d)}
+ },[editing]);
+ // Ô Hỏi tiếp trên mobile bám ngay trên bàn phím: đo phần màn hình bàn phím che (visualViewport).
+ useEffect(()=>{
+  const vv=window.visualViewport;if(!mobile||!vv)return;
+  const update=()=>document.documentElement.style.setProperty('--kb',`${Math.max(0,Math.round(window.innerHeight-vv.height-vv.offsetTop))}px`);
+  vv.addEventListener('resize',update);vv.addEventListener('scroll',update);update();
+  return()=>{vv.removeEventListener('resize',update);vv.removeEventListener('scroll',update);document.documentElement.style.removeProperty('--kb')};
+ },[mobile]);
  // Mở lại form: nếu lần trước bấm ra ngoài khi đang gõ dở thì khôi phục bản gõ dở.
  function editQuestion(){
+  setFiltersOpen(false);
   const d=draft.current;draft.current=null;
   if(d){setQuestion(d.question);setKeyword(d.keyword);setKind(d.kind);setFrom(d.from);setTo(d.to)}
-  setEditing(true);requestAnimationFrame(()=>{const el=questionField.current;if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}});
+  const inPlace=window.scrollY>80;
+  setFloating(inPlace);if(inPlace)keepPlace();
+  setEditing(true);requestAnimationFrame(()=>{const el=questionField.current;if(el){el.focus({preventScroll:true});el.setSelectionRange(el.value.length,el.value.length)}});
  }
- // Trả câu hỏi và bộ lọc về đúng những gì kết quả đang hiện dựa trên.
- function restoreApplied(){setQuestion(applied.question);setKeyword(applied.keyword);setKind(applied.kind);setFrom(applied.from);setTo(applied.to);setEditing(false);setNotice('')}
- // Hủy sửa (nút hoặc Esc): bỏ hẳn bản gõ dở, focus về nút Sửa câu hỏi.
+ // Trả câu hỏi và bộ lọc về đúng những gì kết quả đang hiện dựa trên; người đọc ở lại đúng chỗ.
+ function restoreApplied(){if(floating)keepPlace();setQuestion(applied.question);setKeyword(applied.keyword);setKind(applied.kind);setFrom(applied.from);setTo(applied.to);setEditing(false);setNotice('')}
+ // Hủy (nút hoặc Esc): bỏ hẳn bản gõ dở, focus về nút Sửa câu hỏi.
  function cancelEdit(){draft.current=null;restoreApplied();requestAnimationFrame(()=>editButton.current?.focus())}
- // Bấm ra ngoài khối tìm kiếm khi đang sửa: thu form lại như Hủy sửa, nhưng giữ bản gõ dở cho lần mở sau và không giành focus.
+ // Bấm ra ngoài khối tìm kiếm khi đang sửa: thu form lại như Hủy, nhưng giữ bản gõ dở cho lần mở sau và không giành focus.
  // Nghe sự kiện click (sau khi thả chuột) để form thu lại không làm lệch chỗ người dùng vừa bấm.
  useEffect(()=>{
   if(!editing||EMBED||!result)return;
@@ -235,8 +263,16 @@ function App(){
  const showAllEvidence=()=>{setEvidenceAll(true);setDocFocus(null)};
  function clearFilters(){setDocFocus(null);setKeyword('');setKind('');setFrom('');setTo('');setApplied(a=>({...a,keyword:'',kind:'',from:'',to:''}));setResult(documents);setNotice('Đã xóa bộ lọc.')}
  // Bấm Hỏi là thu đầu trang ngay, không đợi kết quả; focus về nút Sửa câu hỏi để không mất vị trí bàn phím.
- function search(event){event.preventDefault();if(from&&to&&from>to){setNotice('Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.');return}setBusy(true);setNotice('Đang lọc dữ liệu mẫu…');
-  setApplied({question,keyword,kind,from,to});setEditing(false);requestAnimationFrame(()=>editButton.current?.focus());
+ function search(event){event.preventDefault();runSearch(question,floating)}
+ // Hỏi tiếp (mobile): câu mới chạy như một lượt tìm mới với bộ lọc đang áp dụng, thay kết quả hiện tại và đưa người đọc về đầu kết quả.
+ function askFollowUp(event){
+  event.preventDefault();const q=followUp.trim();if(!q){followField.current?.focus();return}
+  draft.current=null;setQuestion(q);setFollowUp('');followField.current?.blur();runSearch(q,true);
+ }
+ function runSearch(q,toResults){if(from&&to&&from>to){setNotice('Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.');return}setBusy(true);setNotice('Đang lọc dữ liệu mẫu…');
+  setApplied({question:q,keyword,kind,from,to});setEditing(false);
+  // Hỏi từ giữa trang: đưa người đọc về đầu kết quả mới.
+  requestAnimationFrame(()=>{if(toResults){const behavior=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';document.getElementById('results')?.scrollIntoView({block:'start',behavior})}editButton.current?.focus({preventScroll:true})});
   window.setTimeout(()=>{const filtered=documents.filter(d=>{const date=d[1].split('/').reverse().join('-');return (!keyword||normalize(d.join(' ')).includes(normalize(keyword)))&&(!kind||(kind==='Báo cáo'?d[0].includes('BC'):kind==='Công văn'?d[0].includes('CV'):d[0].includes('NQ')))&&(!from||date>=from)&&(!to||date<=to)});setResult(filtered);setShowAnswer(llm&&tab==='qa');setBusy(false);setNotice('Đang hiển thị dữ liệu mẫu từ PDF. Chưa kết nối API tra cứu hoặc LLM để trả lời câu hỏi mới.');},250)
  }
  function downloadReport(){
@@ -285,10 +321,10 @@ function App(){
   {[['qa','Hỏi đáp'],['report','Báo cáo tổng hợp']].map(([id,title])=><button key={id} type="button" role="tab" id={`tab-${id}`} aria-selected={tab===id} aria-controls="results" tabIndex={tab===id?0:-1} className="tab" onClick={()=>selectMode(id)}>{title}</button>)}
  </div></nav>;
 
- return <main className={EMBED?`embed ${wide?'embed-wide':''}`:editing?undefined:`compact ${barHidden?'bar-hidden':''}`}>
+ return <main className={EMBED?`embed ${wide?'embed-wide':''}`:`${editing?'':`compact ${barHidden?'bar-hidden':''}`} ${mobile?'mobile':''}`}>
  {/* Khi đang sửa câu hỏi: đầu trang đầy đủ. Khi đang tìm hoặc đã có kết quả: gộp vào thanh câu hỏi. */}
  {EMBED?<><h1 className="sr-only">Tra cứu và tổng hợp văn bản</h1><p className="embed-note">Dữ liệu mẫu chép từ PDF, chưa kết nối API tra cứu hoặc LLM.</p></>
- :editing?<>
+ :editing&&!floating?<>
  <header inert={behind}>
   <div className="brand"><h1>Tra cứu và tổng hợp văn bản</h1><p>Bản demo. Chưa có Keycloak nên chọn người dùng giả lập, mọi lượt vẫn qua Adapter quyền.</p><p id="identity">{identity}</p></div>
   <label className="user">Người dùng giả lập{userSelect}</label>
@@ -296,17 +332,23 @@ function App(){
  {modeNav}
  </>:<h1 className="sr-only">Tra cứu và tổng hợp văn bản</h1>}
 
- {!EMBED&&(editing?<form onSubmit={search} className="query" onKeyDown={e=>{if(e.key==='Escape'&&e.target.tagName!=='SELECT'){e.preventDefault();cancelEdit()}}}>
+ {!EMBED&&(editing?<form onSubmit={search} className={`query ${floating?'floating':''}`} aria-label={floating?'Sửa câu hỏi':undefined} onKeyDown={e=>{if(e.key==='Escape'&&e.target.tagName!=='SELECT'){e.preventDefault();cancelEdit()}}}>
   <div className="search-row">
    <label className="sr-only" htmlFor="question">Câu hỏi tra cứu</label>
    <textarea id="question" ref={questionField} rows="1" value={question} required onChange={e=>setQuestion(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();e.currentTarget.form.requestSubmit()}}}/>
-   <button className="primary" disabled={busy}>{busy?'Đang tìm…':tab==='qa'?'Hỏi':'Tổng hợp'}</button>
+   {/* Đang sửa một câu hỏi đã có kết quả: Hủy (phụ) cạnh Xác nhận (chính). */}
+   <div className="search-actions">
+    <button type="button" className="btn btn-secondary" onClick={cancelEdit}>Hủy</button>
+    <button className="primary" disabled={busy}>{busy?'Đang tìm…':'Xác nhận'}</button>
+   </div>
   </div>
   <div className="query-options">
    <label className="check"><input type="checkbox" checked={auto} onChange={e=>{setAuto(e.target.checked);setNotice('Tự nhận bộ lọc cần kết nối API. Bạn có thể sử dụng Bộ lọc để lọc dữ liệu mẫu.')}}/> Tự nhận bộ lọc trong câu hỏi</label>
    <label className="check"><input type="checkbox" checked={llm} onChange={e=>setLlm(e.target.checked)}/> Viết câu trả lời (LLM)</label>
-   <details className="filters">
-    <summary>Bộ lọc{filterCount>0&&<span className="filter-count">({filterCount})</span>}<Icon name="down"/></summary>
+   <button type="button" className="filter-toggle" aria-expanded={filtersOpen} aria-controls="query-filter-panel" onClick={()=>setFiltersOpen(!filtersOpen)}>Bộ lọc{filterCount>0&&<span className="filter-count">({filterCount})</span>}<Icon name="down"/></button>
+   <span className="timing" title="Thời gian được hiển thị trong PDF mẫu">Tìm 0.522s, LLM 8.927s</span>
+  </div>
+  <div id="query-filter-panel" className="filters" hidden={!filtersOpen}>
    <div className="filter-grid">
     <label>Từ khóa văn bản<input value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="Số hiệu hoặc nội dung"/></label>
     <label>Loại văn bản<select value={kind} onChange={e=>setKind(e.target.value)}><option value="">Tất cả</option><option>Báo cáo</option><option>Công văn</option><option>Nghị quyết</option></select></label>
@@ -314,9 +356,7 @@ function App(){
     <label>Đến ngày<input type="date" value={to} onChange={e=>setTo(e.target.value)}/></label>
    </div>
    <button type="button" className="btn" onClick={clearFilters}>Xóa bộ lọc</button>
-   </details>
-   <button type="button" className="link-btn" onClick={cancelEdit}>Hủy sửa</button>
-   <span className="timing" title="Thời gian được hiển thị trong PDF mẫu">Tìm 0.522s, LLM 8.927s</span>
+
   </div>
  </form>
  // Thanh câu hỏi: chế độ tra cứu, câu hỏi đang được trả lời, người dùng giả lập; bám đầu trang khi cuộn.
@@ -325,9 +365,15 @@ function App(){
   <p className="query-text" title={applied.question} onClick={editQuestion}><span className="sr-only">Câu hỏi đang xem: </span>{applied.question}</p>
   {appliedFilters>0&&<p className="query-filters">Bộ lọc ({appliedFilters})<button type="button" className="link-btn" onClick={clearFilters}>Xóa bộ lọc</button></p>}
   {busy?<span className="timing">Đang tìm…</span>:<span className="timing" title="Thời gian được hiển thị trong PDF mẫu">Tìm 0.522s, LLM 8.927s</span>}
-  <button type="button" className="btn btn-primary" ref={editButton} onClick={editQuestion}>Sửa câu hỏi</button>
+  <button type="button" className="btn btn-primary" ref={editButton} aria-label="Sửa câu hỏi" onClick={editQuestion}>Sửa</button>
   <label className="user-compact" title={identity}><span className="sr-only">Người dùng giả lập</span>{userSelect}</label>
  </div>)}
+ {/* Hỏi tiếp (mobile): ô hỏi câu mới ghim đáy màn hình; ẩn khi đang sửa câu hỏi hoặc mở panel bằng chứng. */}
+ {mobile&&!editing&&<form className={`follow-up ${barHidden?'is-hidden':''}`} onSubmit={askFollowUp} inert={behind} onFocus={()=>setBarHidden(false)}>
+  <label className="sr-only" htmlFor="follow-up">Hỏi tiếp hoặc hỏi câu mới</label>
+  <input id="follow-up" ref={followField} value={followUp} onChange={e=>setFollowUp(e.target.value)} placeholder="Hỏi tiếp hoặc hỏi câu mới" enterKeyHint="send" autoComplete="off"/>
+  <button className="primary" disabled={busy}>{busy?'Đang tìm…':'Hỏi'}</button>
+ </form>}
  {notice&&<p id="notice" role="status" inert={behind}>{notice}</p>}
 
  <p className="sr-only" aria-live="polite">{announce}</p>

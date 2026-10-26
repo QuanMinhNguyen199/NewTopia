@@ -1,5 +1,6 @@
 node_modules/
 dist/
-.impeccable/review/
+.impeccable/
 *.zip
 .openai/
+.hallmark/
