@@ -250,9 +250,9 @@ function App(){
   select(next);document.getElementById(`tab-${next}`).focus();
  }
  function selectMode(id){setTab(id);setNotice(id==='report'?'Báo cáo tổng hợp từ các văn bản mẫu trong PDF.':'')}
- // Khớp hai cột: trên desktop, sau khi người dùng mở một đơn vị, cột bằng chứng chỉ hiện nguồn của các đơn vị đang mở.
+ // Khớp hai cột: khi có cột bằng chứng (desktop) hoặc panel (dưới 1100px), sau khi người dùng mở một đơn vị, bằng chứng chỉ hiện nguồn của các đơn vị đang mở.
  const openGroups=groups.filter(g=>expanded.includes(g.unit));
- const unitMatching=wide&&evidenceShown&&tab==='qa'&&showAnswer&&!evidenceAll&&openGroups.length>0&&!allOpen;
+ const unitMatching=(wide||panel)&&tab==='qa'&&showAnswer&&!evidenceAll&&openGroups.length>0&&!allOpen;
  const matching=!!docFocus||unitMatching;
  const contextSources=new Set(docFocus?docFocus.list:openGroups.flatMap(g=>g.items.map(i=>i.src)));
  const shownSources=sources.map((_,i)=>i+1).filter(n=>!matching||contextSources.has(n));
@@ -260,6 +260,10 @@ function App(){
  const contextName=openGroups.length>2?`${openGroups[0].unit} và ${openGroups.length-1} đơn vị khác`:openGroups.map(g=>g.unit).join(' và ');
  const tabCount=(shown,total)=>matching&&shown!==total?`${shown}/${total}`:total;
  const evidenceTabs=[['docs','Văn bản',tabCount(shownDocs.length,result.length)],['sources','Đoạn nguồn',tabCount(shownSources.length,sources.length)],['relations','Quan hệ',relationRows.length]];
+ // Số trên dải theo đúng bộ lọc của bằng chứng: "đang hiện/tổng" khi đang khớp với các ý đang mở hoặc một văn bản.
+ const railCount=tabCount(shownDocs.length,result.length);
+ const railContext=matching?` của ${docFocus?docFocus.code:contextName}`:'';
+ const railSummary=matching?`${shownDocs.length}/${result.length} văn bản, ${shownSources.length}/${sources.length} đoạn nguồn`:`${result.length} văn bản, ${sources.length} đoạn nguồn`;
  const visibleDocs=allDocs?shownDocs:shownDocs.slice(0,DOC_PREVIEW);
 
  // Mỗi đơn vị là một dòng sổ: lề trái ghi các nguồn mà đơn vị dùng (dữ liệu thật), cột chính là tên và các ý.
@@ -399,9 +403,9 @@ function App(){
  </aside>
  {/* Dải bằng chứng: ≥1100px (hoặc khung nhúng ≥720px) khi đã thu gọn; dưới 1100px khi panel đóng. */}
  {!evidenceShown&&<button type="button" ref={railButton} className="evidence-rail" aria-expanded="false" aria-controls="evidence"
-  aria-label={`Mở bằng chứng: ${result.length} văn bản, ${sources.length} đoạn nguồn`} title={`${result.length} văn bản, ${sources.length} đoạn nguồn`}
+  aria-label={`Mở bằng chứng${railContext}: ${railSummary}`} title={railSummary}
   onClick={()=>{openEvidence();if(wide)requestAnimationFrame(()=>document.getElementById('evidence')?.focus({preventScroll:true}))}}>
-  <span className="rail-label">Bằng chứng</span><span className="count">{result.length}</span>
+  <span className="rail-label">Bằng chứng</span><span className="count" key={railCount}>{railCount}</span>
  </button>}
  </div>
 

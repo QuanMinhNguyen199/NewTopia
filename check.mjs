@@ -111,6 +111,14 @@ await page.screenshot({path:'.impeccable/review/mobile.png',fullPage:true});
 if(await page.locator('.results').evaluate(e=>getComputedStyle(e).display)==='grid')throw Error('Mobile should be single column');
 await page.locator('.answer .cite').first().click();
 await page.locator('.excerpt.inline').waitFor({timeout:3000}).catch(()=>{throw Error('Mobile inline citation failed')});
+// Panel (dưới 1100px) cũng khớp với các ý đang mở: mở đơn vị Xã Đại Phúc rồi mở panel thì chỉ thấy nguồn 2.
+await page.setViewportSize({width:900,height:900});await page.waitForTimeout(300);
+await page.getByRole('button',{name:/Xã Đại Phúc/}).click();
+if(await page.locator('.evidence-rail .count').textContent()!=='1/15')throw Error('Rail count should follow open units');
+await page.locator('.evidence-rail').click();await page.waitForTimeout(350);
+await page.locator('#tab-sources').click();
+if(!await page.locator('.context-line').isVisible()||await page.locator('#panel-sources .excerpt').count()>=8)throw Error('Panel should match open units');
+await page.keyboard.press('Escape');await page.waitForTimeout(300);
 // Dưới 768px vẫn có dải bằng chứng bên phải; bấm mở panel, Esc đóng.
 for(const width of [745,390]){
  await page.setViewportSize({width,height:844});

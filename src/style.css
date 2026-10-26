@@ -208,9 +208,11 @@ dialog[open]::backdrop{background:var(--backdrop);animation:fade-in .2s ease-out
 /* Dải bằng chứng: nền xanh mực để nổi như một nút hành động; hover đậm hơn và nhô ra như kéo mép hồ sơ */
 .evidence-rail{display:flex;flex-direction:column;align-items:center;gap:10px;width:44px;padding:16px 0 14px;border:1px solid var(--action);border-radius:4px;background:var(--action);color:#fff;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(22,35,58,.18);transition:background-color .12s ease-out,translate .2s var(--out),box-shadow .2s var(--out);animation:rail-in .36s var(--out)}
 .evidence-rail .rail-label{writing-mode:vertical-rl;line-height:1}
-.evidence-rail .count{min-width:24px;padding-top:8px;border-top:1px solid rgba(255,255,255,.35);color:#fff;font-weight:600;text-align:center}
+.evidence-rail .count{animation:count-flash .6s ease-out;font-variant-numeric:tabular-nums;min-width:24px;padding-top:8px;border-top:1px solid rgba(255,255,255,.35);color:#fff;font-weight:600;text-align:center}
 .evidence-rail:hover{background:var(--action-hover);border-color:var(--action-hover);translate:-4px 0;box-shadow:0 6px 18px rgba(22,35,58,.26)}
 .evidence-rail:active{translate:-2px 0}
+/* Số trên dải nháy sáng khi đổi theo ý đang mở */
+@keyframes count-flash{from{background:rgba(255,255,255,.35)}to{background:transparent}}
 @keyframes rail-in{from{translate:100% 0;opacity:0}to{translate:0 0;opacity:1}}
 /* Mở lại ngăn bằng chứng trên desktop: trượt ra từ mép phải, cùng hướng với dải */
 .evidence.docking{animation:drawer-in .28s var(--out)}
@@ -314,7 +316,7 @@ dialog[open]::backdrop{background:var(--backdrop);animation:fade-in .2s ease-out
  .excerpt.inline,.drawer,dialog[open]{animation:fade-in .15s ease-out}
  .unit-body,.unit.open .unit-body{transition:opacity .15s ease-out}
  .unit-row .icon,.filters summary .icon,.tab-ink,.evidence,.evidence.is-open{transition:none}
- .evidence-rail{animation:none;transition:background-color .12s ease-out}
+ .evidence-rail,.evidence-rail .count{animation:none;transition:background-color .12s ease-out}
  .query-bar,.query-bar.is-hidden,.compact .evidence{transition:none}
  .evidence-rail:hover,.evidence-rail:active{translate:none}
  .evidence.docking{animation:fade-in .15s ease-out}
