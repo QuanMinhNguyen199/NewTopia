@@ -9,6 +9,8 @@ await page.goto(process.env.CHECK_URL || 'http://127.0.0.1:5173');
 await page.screenshot({path:'.impeccable/review/desktop.png',fullPage:true});
 // Đã có kết quả: khối câu hỏi thu thành thanh, mở lại bằng Sửa câu hỏi, Hủy trả về câu hỏi cũ.
 if(!await page.locator('.query-bar').isVisible()||await page.locator('#question').count())throw Error('Collapsed query bar missing');
+// iOS: viewport-fit=cover để env(safe-area-inset-*) có giá trị; PWA: có manifest.
+if(!(await page.locator('meta[name=viewport]').getAttribute('content')).includes('viewport-fit=cover')||!await page.locator('link[rel=manifest]').count())throw Error('Safe-area viewport or manifest missing');
 if(await page.getByRole('button',{name:'Sửa câu hỏi'}).evaluate(e=>getComputedStyle(e).backgroundColor)!=='rgb(29, 62, 115)')throw Error('Sửa câu hỏi should be the navy primary button');
 await page.getByRole('button',{name:'Sửa câu hỏi'}).click();
 await page.locator('#question').fill('câu hỏi tạm');
@@ -54,6 +56,14 @@ await page.mouse.wheel(0,-150);await page.waitForTimeout(400);
 if(await page.locator('.query-bar.is-hidden').count())throw Error('Query bar should show on scroll up');
 await page.evaluate(()=>scrollTo(0,0));
 await page.getByRole('button',{name:'Thu gọn tất cả',exact:true}).first().click();
+// Lề nguồn của đơn vị đang mở: [n] kèm số hiệu văn bản; trỏ vào một ý thì nguồn của ý đó được tô sáng.
+await page.getByRole('button',{name:/Xã Phù Cát/}).click();
+const phuCat=page.locator('.unit.open').filter({hasText:'Xã Phù Cát'});
+if(!(await phuCat.locator('.margin-srcs').textContent()).includes('109 - BC/BCĐ57'))throw Error('Open unit margin should list document numbers');
+await phuCat.locator('li[data-src="4"]').evaluate(e=>e.scrollIntoView({block:'center'}));
+await phuCat.locator('li[data-src="4"]').hover();await page.waitForTimeout(100);
+if((await phuCat.locator('.margin-srcs li.is-current').textContent())?.includes('[4]')!==true)throw Error('Hovered point should highlight its source in the margin');
+await page.getByRole('button',{name:/Xã Phù Cát/}).click();
 // Thu gọn bằng chứng thành dải; [n] mở lại.
 await page.getByRole('button',{name:'Thu gọn',exact:true}).click();
 if(await page.locator('#evidence').isVisible()||!await page.locator('.evidence-rail').first().isVisible())throw Error('Collapse evidence failed');

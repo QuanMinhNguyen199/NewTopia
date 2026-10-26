@@ -1,10 +1,10 @@
 import React, {useState, useRef, useEffect, useLayoutEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 import {answers, documents, relations, sources, sourceOrigins} from './data.js';
-import '@fontsource/ibm-plex-sans/400.css';
-import '@fontsource/ibm-plex-sans/500.css';
-import '@fontsource/ibm-plex-sans/600.css';
-import '@fontsource/ibm-plex-sans/700.css';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/500.css';
+import '@fontsource/manrope/600.css';
+import '@fontsource/manrope/700.css';
 import '@fontsource/tinos/400.css';
 import '@fontsource/tinos/700.css';
 import './style.css';
@@ -90,7 +90,7 @@ function Cite({item,open,onToggle,split,active}){
 function Bullet(props){
  const {item,open,split,active,openDocument}=props;
  const [title,,text]=sources[item.src-1];
- return <li id={`point-${item.id}`} tabIndex={-1} className={active?'active':undefined}>
+ return <li id={`point-${item.id}`} data-src={item.src} tabIndex={-1} className={active?'active':undefined}>
   {item.text}<Cite {...props}/>
   {open&&!split&&<div className="excerpt inline" id={`cite-${item.id}`}>
    <SourceHead n={item.src} title={title}/>
@@ -150,6 +150,16 @@ function App(){
   window.addEventListener('scroll',onScroll,{passive:true});
   return()=>window.removeEventListener('scroll',onScroll);
  },[editing]);
+ // Đang đọc ý nào (trỏ chuột hoặc focus): tô sáng nguồn tương ứng ở lề của đơn vị đó.
+ const [readingAt,setReadingAt]=useState(null);
+ // Chiều cao thanh câu hỏi đang hiện (0 khi ẩn hoặc không có): lề nguồn và tên đơn vị bám ngay dưới nó.
+ useEffect(()=>{
+  const root=document.documentElement,bar=document.querySelector('.query-bar');
+  if(!bar||barHidden){root.style.setProperty('--bar-h','0px');return}
+  const set=()=>root.style.setProperty('--bar-h',`${bar.offsetHeight}px`);
+  const observer=new ResizeObserver(set);observer.observe(bar);set();
+  return()=>observer.disconnect();
+ },[barHidden,editing,mobile,wide]);
  // Panel bằng chứng (dưới 1100px): mở thì đưa focus vào panel.
  useEffect(()=>{if(behind)document.getElementById('evidence')?.focus({preventScroll:true})},[behind]);
  const filterCount=[keyword,kind,from,to].filter(Boolean).length;
@@ -306,11 +316,18 @@ function App(){
  // Nội dung đơn vị đang đóng vẫn được render để mở/đóng có chuyển động, nhưng bị inert và ẩn khỏi trình đọc màn hình.
  function renderUnit(group){
   const open=expanded.includes(group.unit),panel=`unit-${group.items[0].id}`,srcs=[...new Set(group.items.map(i=>i.src))];
+  const reading=readingAt?.unit===group.unit?readingAt.src:null;
+  const pick=e=>{const li=e.target.closest?.('li[data-src]');if(li)setReadingAt({unit:group.unit,src:Number(li.dataset.src)})};
   return <section className={`unit ${open?'open':''}`} key={group.unit}>
-   <p className="unit-margin">Nguồn {srcs.join(', ')}</p>
+   {/* Lề nguồn: đóng thì một dòng "Nguồn 3, 4"; mở thì liệt kê [n] kèm số hiệu văn bản, bám theo khi cuộn qua đơn vị,
+       và tô sáng nguồn của ý đang được trỏ hoặc focus. */}
+   <div className="unit-margin">{open
+    ?<div className="margin-inner"><p className="margin-label">Nguồn</p>
+      <ul className="margin-srcs">{srcs.map(n=><li key={n} className={reading===n?'is-current':undefined}><span className="m-n">[{n}]</span><span className="m-doc">{sources[n-1][0]}</span></li>)}</ul></div>
+    :<p className="margin-closed">Nguồn {srcs.join(', ')}</p>}</div>
    <div className="unit-main">
     <h3><button type="button" className="unit-row" aria-expanded={open} aria-controls={panel} onClick={()=>toggleGroup(group.unit)}><span className="unit-label"><span className="unit-name">{group.unit}</span><span className="unit-sub">{group.items.length} ý<span className="unit-src">, nguồn {srcs.join(', ')}</span></span></span><Icon name="down"/></button></h3>
-    <div className="unit-body" id={panel} inert={!open} aria-hidden={!open}><div className="unit-inner"><ul>{group.items.map(item=><Bullet key={item.id} {...bulletProps(item)}/>)}</ul></div></div>
+    <div className="unit-body" id={panel} inert={!open} aria-hidden={!open}><div className="unit-inner"><ul onMouseOver={pick} onFocus={pick} onMouseLeave={()=>setReadingAt(null)}>{group.items.map(item=><Bullet key={item.id} {...bulletProps(item)}/>)}</ul></div></div>
    </div>
   </section>;
  }
